@@ -64,12 +64,12 @@ namespace Unity.XR.PXR
 
         private void OnPreRender()
         {
-            s_DisplaySubsystem.BeginRecordingIfLateLatched(m_LateLatchingCamera);
+            //s_DisplaySubsystem.BeginRecordingIfLateLatched(m_LateLatchingCamera);
         }
 
         private void OnPostRender()
         {
-            s_DisplaySubsystem.EndRecordingIfLateLatched(m_LateLatchingCamera);
+            //s_DisplaySubsystem.EndRecordingIfLateLatched(m_LateLatchingCamera);
         }
 
         private void FixedUpdate()
