@@ -34,7 +34,6 @@ namespace Unity.XR.PXR
         /// Sets foveated rendering level.
         /// </summary>
         /// <param name="level">Foveated rendering level: None (disabled); Low; Med; High; TopHigh.</param>
-        /// <returns>None.</returns>
         public static void SetFoveationLevel(FoveationLevel level)
         {
             PXR_Plugin.Render.UPxr_SetFoveationLevel(level);
@@ -43,7 +42,6 @@ namespace Unity.XR.PXR
         /// <summary>
         /// Gets the current foveated rendering level.
         /// </summary>
-        /// <param>None.</param>
         /// <returns>The current foveated rendering level: -1-None (foveated rendering not enabled); Low; Med; High; TopHigh.</returns>
         public static FoveationLevel GetFoveationLevel()
         {
@@ -57,7 +55,6 @@ namespace Unity.XR.PXR
         /// <param name="foveationGainY">The reduction rate of peripheral pixels in the Y-axis direction. Value range: [1.0, 10.0], the greater the value, the higher the reduction rate.</param>
         /// <param name="foveationArea">The range of foveated area whose resolution is not to be reduced. Value range: [0.0, 4.0], the higher the value, the bigger the high-quality central area.</param>
         /// <param name="foveationMinimum">The minimum pixel density. Recommended values: 1/32, 1/16, 1/8, 1/4, 1/2. The actual pixel density will be greater than or equal to the value set here.</param>
-        /// <returns>None.</returns>
         public static void SetFoveationParameters(float foveationGainX, float foveationGainY, float foveationArea, float foveationMinimum)
         {
             PXR_Plugin.Render.UPxr_SetFoveationParameters(foveationGainX, foveationGainY, foveationArea, foveationMinimum);

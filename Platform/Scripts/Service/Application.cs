@@ -18,6 +18,8 @@ namespace Pico.Platform
 {
     /**
      * \ingroup Platform
+     *
+     * ApplicationService provides functions like launch other application,jump to store, get launch details.
      */
     public static class ApplicationService
     {

@@ -94,13 +94,18 @@ namespace Unity.XR.PXR
                     useContentProtect = Convert.ToUInt16(PXR_ProjectSetting.GetProjectConfig().useContentProtect),
                     systemDisplayFrequency = settings.GetSystemDisplayFrequency(),
                     optimizeBufferDiscards = settings.GetOptimizeBufferDiscards(),
-                    enableAppSpaceWarp = Convert.ToUInt16(settings.enableAppSpaceWarp)
+                    enableAppSpaceWarp = Convert.ToUInt16(settings.enableAppSpaceWarp),                    
+                    enableSubsampled = Convert.ToUInt16(PXR_ProjectSetting.GetProjectConfig().enableSubsampled)
                 };
 
                 PXR_Plugin.System.UPxr_Construct(ConvertRotationWith2Vector);
                 PXR_Plugin.System.UPxr_SetInputDeviceChangedCallBack(InputDeviceChangedFunction);
                 PXR_Plugin.System.UPxr_SetSeethroughStateChangedCallBack(SeethroughStateChangedFunction);
+                PXR_Plugin.System.UPxr_SetFitnessBandNumberOfConnectionsCallBack(FitnessBandNumberOfConnectionsFunction);
+                PXR_Plugin.System.UPxr_SetFitnessBandElectricQuantityCallBack(FitnessBandElectricQuantityFunction);
+                PXR_Plugin.System.UPxr_SetFitnessBandAbnormalCalibrationDataCallBack(FitnessBandAbnormalCalibrationDataFunction);
                 PXR_Plugin.System.UPxr_SetUserDefinedSettings(userDefinedSettings);
+
             }
 #endif
 
@@ -176,6 +181,34 @@ namespace Unity.XR.PXR
             }
         }
 
+        [MonoPInvokeCallback(typeof(FitnessBandNumberOfConnectionsCallBack))]
+        static void FitnessBandNumberOfConnectionsFunction(int state, int value)
+        {
+            if (PXR_Plugin.System.FitnessBandNumberOfConnections != null)
+            {
+                PXR_Plugin.System.FitnessBandNumberOfConnections(state, value);
+            }
+        }
+
+        [MonoPInvokeCallback(typeof(FitnessBandElectricQuantityCallBack))]
+        static void FitnessBandElectricQuantityFunction(int trackerID, int battery)
+        {
+            if (PXR_Plugin.System.FitnessBandElectricQuantity != null)
+            {
+                PXR_Plugin.System.FitnessBandElectricQuantity(trackerID, battery);
+            }
+        }
+
+        [MonoPInvokeCallback(typeof(FitnessBandAbnormalCalibrationDataCallBack))]
+        static void FitnessBandAbnormalCalibrationDataFunction(int state, int value)
+        {
+            if (PXR_Plugin.System.FitnessBandAbnormalCalibrationData != null)
+            {
+                PXR_Plugin.System.FitnessBandAbnormalCalibrationData(state, value);
+            }
+        }
+
+
         public PXR_Settings GetSettings()
         {
             PXR_Settings settings = null;
@@ -200,7 +233,7 @@ namespace Unity.XR.PXR
         static void RuntimeLoadPicoPlugin()
         {
             PXR_Plugin.System.UPxr_LoadPICOPlugin();
-            string version = "UnityXR_" + PXR_Plugin.System.UPxr_GetSDKVersion();
+            string version = "UnityXR_" + PXR_Plugin.System.UPxr_GetSDKVersion() + "_" + Application.unityVersion;
             PXR_Plugin.System.UPxr_SetConfigString( ConfigType.EngineVersion, version );
         }
 #endif

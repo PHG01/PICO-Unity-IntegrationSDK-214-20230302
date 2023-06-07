@@ -29,6 +29,21 @@ namespace Pico.Platform
                     break;
                 }
 
+                #region compliance
+
+                case MessageType.Compliance_DetectSensitive:
+                {
+                    msg = new Message<DetectSensitiveResult>(msgPointer, ptr =>
+                    {
+                        var obj = CLIB.ppf_Message_GetDetectSensitiveResult(ptr);
+                        if (obj == IntPtr.Zero) return null;
+                        return new DetectSensitiveResult(obj);
+                    });
+                    break;
+                }
+
+                #endregion
+
                 #region Sport
 
                 case MessageType.Sport_GetSummary:
@@ -66,6 +81,16 @@ namespace Pico.Platform
 
                 #region User
 
+                case MessageType.User_EntitlementCheck:
+                {
+                    msg = new Message<EntitlementCheckResult>(msgPointer, ptr =>
+                    {
+                        var obj = CLIB.ppf_Message_GetEntitlementCheckResult(ptr);
+                        if (obj == IntPtr.Zero) return null;
+                        return new EntitlementCheckResult(obj);
+                    });
+                    break;
+                }
                 case MessageType.User_GetAuthorizedPermissions:
                 case MessageType.User_RequestUserPermissions:
                 {
@@ -124,6 +149,7 @@ namespace Pico.Platform
                     break;
                 }
                 case MessageType.User_GetAccessToken:
+                case MessageType.User_GetIdToken:
                 case MessageType.Rtc_GetToken:
                 case MessageType.Notification_Rtc_OnTokenWillExpire:
                 case MessageType.Notification_Rtc_OnUserStartAudioCapture:
@@ -438,6 +464,16 @@ namespace Pico.Platform
                     });
                     break;
                 }
+                case MessageType.IAP_GetSubscriptionStatus:
+                {
+                    msg = new Message<SubscriptionStatus>(msgPointer, ptr =>
+                    {
+                        var obj = CLIB.ppf_Message_GetSubscriptionStatus(ptr);
+                        if (obj == IntPtr.Zero) return null;
+                        return new SubscriptionStatus(obj);
+                    });
+                    break;
+                }
                 case MessageType.IAP_LaunchCheckoutFlow:
                 {
                     msg = new Message<Purchase>(msgPointer, ptr =>
@@ -578,6 +614,15 @@ namespace Pico.Platform
                     });
                     break;
                 }
+                case MessageType.Matchmaking_Browse2CustomPage:
+                {
+                    msg = new Message<MatchmakingBrowseResult>(msgPointer, ptr =>
+                    {
+                        var obj = CLIB.ppf_Message_GetMatchmakingBrowseCustomPageResult(ptr);
+                        return new MatchmakingBrowseResult(obj);
+                    });
+                    break;
+                }
                 case MessageType.Matchmaking_Enqueue2:
                 case MessageType.Matchmaking_EnqueueRoom2:
                 {
@@ -615,6 +660,7 @@ namespace Pico.Platform
                 case MessageType.Room_InviteUser:
                 case MessageType.Room_Join:
                 case MessageType.Room_Join2:
+                case MessageType.Room_JoinNamed:
                 case MessageType.Room_KickUser:
                 case MessageType.Room_Leave:
                 case MessageType.Room_SetDescription:
@@ -632,6 +678,7 @@ namespace Pico.Platform
                     break;
                 }
                 case MessageType.Room_GetModeratedRooms:
+                case MessageType.Room_GetNamedRooms:
                 case MessageType.Room_GetNextRoomArrayPage:
                 {
                     msg = new Message<RoomList>(msgPointer, ptr =>

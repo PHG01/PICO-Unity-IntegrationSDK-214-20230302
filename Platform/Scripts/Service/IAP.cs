@@ -125,6 +125,24 @@ namespace Pico.Platform
         }
 
         /// <summary>
+        /// Gets the subscription status of a subscription add-on.
+        /// </summary>
+        /// <param name="sku">The SKU of the add-on.</param>
+        /// <returns>
+        /// The subscription status of the add-on. If the user is not entitled to access the add-on, the result will be an empty struct.
+        /// </returns>
+        public static Task<SubscriptionStatus> GetSubscriptionStatus(string sku)
+        {
+            if (!CoreService.Initialized)
+            {
+                Debug.LogError(CoreService.NotInitializedError);
+                return null;
+            }
+
+            return new Task<SubscriptionStatus>(CLIB.ppf_IAP_GetSubscriptionStatus(sku));
+        }
+
+        /// <summary>
         /// Gets the next page of purchasable add-ons.
         /// </summary>
         /// <param name="list">The current page of purchasable add-ons.</param>

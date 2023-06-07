@@ -82,8 +82,16 @@ namespace Unity.XR.PXR.Editor
                     overlayTarget.layerTextures[0] = (Texture)EditorGUI.ObjectField(new Rect(textureControlRect.x, textureControlRect.y, 64, textureControlRect.height), overlayTarget.layerTextures[0], typeof(Texture), false);
                     overlayTarget.layerTextures[1] = (Texture)EditorGUI.ObjectField(new Rect(textureControlRect.x + textureControlRect.width / 2, textureControlRect.y, 64, textureControlRect.height), overlayTarget.layerTextures[1] != null ? overlayTarget.layerTextures[1] : overlayTarget.layerTextures[0], typeof(Texture), false);
 
-                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.Separator();
+                    if (overlayTarget.overlayShape == PXR_OverLay.OverlayShape.Eac)
+                    {
+                        guiContent.text = "overlap Factor";
+                        float overlapFactor = EditorGUILayout.FloatField(guiContent, overlayTarget.overlapFactor);
 
+                        overlayTarget.SetEACFactor(overlapFactor);
+                    }
+
+                    EditorGUILayout.EndVertical();
                 }
                 EditorGUILayout.Separator();
 
@@ -93,7 +101,7 @@ namespace Unity.XR.PXR.Editor
                     overlayTarget.radius = EditorGUILayout.FloatField(guiContent, Mathf.Abs(overlayTarget.radius));
                 }
 
-                if (overlayTarget.overlayShape == PXR_OverLay.OverlayShape.Quad || overlayTarget.overlayShape == PXR_OverLay.OverlayShape.Cylinder || overlayTarget.overlayShape == PXR_OverLay.OverlayShape.Equirect)
+                if (overlayTarget.overlayShape == PXR_OverLay.OverlayShape.Quad || overlayTarget.overlayShape == PXR_OverLay.OverlayShape.Cylinder || overlayTarget.overlayShape == PXR_OverLay.OverlayShape.Equirect || overlayTarget.overlayShape == PXR_OverLay.OverlayShape.Eac)
                 {
                     guiContent.text = "Texture Rects";
                     overlayTarget.useImageRect = EditorGUILayout.Toggle(guiContent, overlayTarget.useImageRect);

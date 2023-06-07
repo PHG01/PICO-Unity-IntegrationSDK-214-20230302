@@ -69,8 +69,6 @@ namespace Unity.XR.PXR
             CacheNoVibrate = 2,
         }
 
-
-
         /// <summary>
         /// Gets the current dominant controller.
         /// </summary>
@@ -523,6 +521,53 @@ namespace Unity.XR.PXR
         public static int UpdateVibrateParams(int sourceId, VibrateController vibrateController, ChannelFlip channelFlip, float amp)
         {
             return PXR_Plugin.Controller.UPxr_UpdateVibrateParams(sourceId, (int)vibrateController, (int)channelFlip, amp);
+        }
+        
+        /// <summary>
+        /// Gets the data about the poses of body joints.
+        /// </summary>
+        /// <param name="predictTime">Reserved parameter, pass `0`.</param>
+        /// <param name="bodyTrackerResult">Contains the data about the poses of body joints, including position, action, and more.</param>
+        public static int GetBodyTrackingPose(double predictTime, ref BodyTrackerResult bodyTrackerResult)
+        {
+            return PXR_Plugin.Controller.UPxr_GetBodyTrackingPose(predictTime, ref bodyTrackerResult);
+        }
+        
+        /// <summary>
+        /// Gets the number of PICO Motion Trackers currently connected and their IDs.
+        /// </summary>
+        /// <param name="state">The number and IDs of connected PICO Motion Trackers.</param>
+        public static int GetFitnessBandConnectState(ref PxrFitnessBandConnectState state)
+        {
+            return PXR_Plugin.Controller.UPxr_GetFitnessBandConnectState(ref state);
+        }
+
+        /// <summary>
+        /// Gets the battery of a specified PICO Motion Traker.
+        /// </summary>
+        /// <param name="trackerId">The ID of the motion tracker to get battery for.</param>
+        /// <param name="battery">The motion tracker's battery. Value range: [0,5]. The smaller the value, the lower the battery level.</param>
+        public static int GetFitnessBandBattery(int trackerId, ref int battery)
+        {
+            return PXR_Plugin.Controller.UPxr_GetFitnessBandBattery(trackerId, ref battery);
+        }
+
+        /// <summary>
+        /// Gets whether the PICO Motion Tracker has completed calibration.
+        /// </summary>
+        /// <param name="calibrated">Indicates the calibration status:
+        /// `0`: calibration uncompleted
+        /// `1`: calibration completed
+        /// </param>
+        public static int GetFitnessBandCalibState(ref int calibrated) {
+            return PXR_Plugin.Controller.UPxr_GetFitnessBandCalibState(ref calibrated);
+        }
+
+        /// <summary>
+        /// Launches the calibration app if the PICO Motion Tracker hasn't completed calibration.
+        /// </summary>
+        public static void OpenFitnessBandCalibrationAPP() {
+            PXR_Plugin.System.UPxr_OpenFitnessBandCalibrationAPP();
         }
 
         /// <summary>

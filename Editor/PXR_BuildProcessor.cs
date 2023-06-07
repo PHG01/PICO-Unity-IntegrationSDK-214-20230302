@@ -95,7 +95,6 @@ namespace Unity.XR.PXR.Editor
 
         private static readonly Dictionary<string, string> AndroidBootConfigVars = new Dictionary<string, string>()
         {
-            { "xr-meta-enabled", "1" }
         };
 
         public void OnPreprocessBuild(BuildReport report)
@@ -221,21 +220,29 @@ namespace Unity.XR.PXR.Editor
             var settings = PXR_XmlTools.GetSettings();
             doc.InsertAttributeInTargetTag(applicationTagPath,null, new Dictionary<string, string>() {{"requestLegacyExternalStorage", "true"}});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","pvr.app.type"}},new Dictionary<string, string>{{"value","vr"}});
-            doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","pvr.sdk.version"}},new Dictionary<string, string>{{"value","XR Platform_2.1.4.3"}});
+            doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","pvr.sdk.version"}},new Dictionary<string, string>{{"value","XR Platform_2.1.5.3"}});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","enable_cpt"}},new Dictionary<string, string>{{"value",PXR_ProjectSetting.GetProjectConfig().useContentProtect ? "1" : "0"}});
-            doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","enable_entitlementcheck"}},new Dictionary<string, string>{{"value",PXR_PlatformSetting.Instance.startTimeEntitlementCheck ? "1" : "0"}});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","handtracking"}},new Dictionary<string, string> {{"value",PXR_ProjectSetting.GetProjectConfig().handTracking ? "1" : "0" }});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","rendering_mode"}},new Dictionary<string, string>{{"value",((int)settings.stereoRenderingModeAndroid).ToString()}});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","display_rate"}},new Dictionary<string, string>{{"value",((int)settings.systemDisplayFrequency).ToString()}});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","color_Space"}},new Dictionary<string, string>{{"value",QualitySettings.activeColorSpace == ColorSpace.Linear ? "1" : "0"}});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","MRCsupport"}},new Dictionary<string, string>{{"value",PXR_ProjectSetting.GetProjectConfig().openMRC ? "1" : "0" }});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name", "pvr.LateLatchingDebug"}}, new Dictionary<string, string> {{"value","0"}});
+            doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","pvr.app.splash"} },new Dictionary<string, string>{{"value",settings.GetSystemSplashScreen(path)}});
+            doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","PICO.swift.feature"}},new Dictionary<string, string>{{"value",PXR_ProjectSetting.GetProjectConfig().bodyTraching ? "1" : "0" }});
             doc.CreateElementInTag(manifestTagPath,usesPermissionTagName,new Dictionary<string, string>{{"name","android.permission.WRITE_SETTINGS"}});
-            if (PXR_ProjectSetting.GetProjectConfig().eyeTracking){doc.CreateElementInTag(manifestTagPath, usesPermissionTagName,new Dictionary<string, string> {{"name", "com.picovr.permission.EYE_TRACKING" }});}
-            if (PXR_ProjectSetting.GetProjectConfig().eyeTracking) { doc.InsertAttributeInTargetTag(metaDataTagPath, new Dictionary<string, string> { { "name", "picovr.software.eye_tracking" } }, new Dictionary<string, string> { { "value", "false/true" } }); }
+            if (PXR_ProjectSetting.GetProjectConfig().eyeTracking)
+            {
+                doc.CreateElementInTag(manifestTagPath, usesPermissionTagName, new Dictionary<string, string> { { "name", "com.picovr.permission.EYE_TRACKING" } });
+                doc.InsertAttributeInTargetTag(metaDataTagPath, new Dictionary<string, string> { { "name", "picovr.software.eye_tracking" } }, new Dictionary<string, string> { { "value", "false/true" } });
+                if (PXR_ProjectSetting.GetProjectConfig().eyetrackingCalibration)
+                {
+                    doc.InsertAttributeInTargetTag(metaDataTagPath, new Dictionary<string, string> { { "name", "eyetracking_calibration" } }, new Dictionary<string, string> { { "value", PXR_ProjectSetting.GetProjectConfig().eyetrackingCalibration ? "true" : "false" } });
+                }
+            }
             if (PXR_ProjectSetting.GetProjectConfig().faceTracking){doc.CreateElementInTag(manifestTagPath, usesPermissionTagName,new Dictionary<string, string>{{"name", "com.picovr.permission.FACE_TRACKING" }});}
             if (PXR_ProjectSetting.GetProjectConfig().lipsyncTracking){doc.CreateElementInTag(manifestTagPath, usesPermissionTagName,new Dictionary<string, string>{{"name", "android.permission.RECORD_AUDIO" }});}
-            if (PXR_ProjectSetting.GetProjectConfig().faceTracking || PXR_ProjectSetting.GetProjectConfig().lipsyncTracking) { doc.InsertAttributeInTargetTag(metaDataTagPath, new Dictionary<string, string> { { "name", "picovr.software.face_tracking" } }, new Dictionary<string, string> { { "value", "false/true" } }); }
+            if (PXR_ProjectSetting.GetProjectConfig().faceTracking) { doc.InsertAttributeInTargetTag(metaDataTagPath, new Dictionary<string, string> { { "name", "picovr.software.face_tracking" } }, new Dictionary<string, string> { { "value", "false/true" } }); }
             doc.Save(originManifestPath);
         }
         public int callbackOrder { get { return 10000; } }

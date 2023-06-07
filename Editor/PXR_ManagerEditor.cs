@@ -57,6 +57,11 @@ namespace Unity.XR.PXR.Editor
             //ffr
             manager.foveationLevel = (FoveationLevel)EditorGUILayout.EnumPopup("Foveation Level", manager.foveationLevel);
 
+            if (FoveationLevel.None != manager.foveationLevel)
+            {
+                projectConfig.enableSubsampled = EditorGUILayout.Toggle("  Enable Subsampled", projectConfig.enableSubsampled);
+            }
+
             //eye tracking
             GUIStyle firstLevelStyle = new GUIStyle(GUI.skin.label);
             firstLevelStyle.alignment = TextAnchor.UpperLeft;
@@ -70,6 +75,7 @@ namespace Unity.XR.PXR.Editor
             manager.eyeTracking = projectConfig.eyeTracking;
             if (manager.eyeTracking)
             {
+                projectConfig.eyetrackingCalibration = EditorGUILayout.Toggle(new GUIContent("Eye Tracking Calibration"), projectConfig.eyetrackingCalibration);
                 EditorGUILayout.BeginVertical("box");
                 EditorGUILayout.LabelField("Note:", firstLevelStyle);
                 EditorGUILayout.LabelField("Eye Tracking is supported only on Neo 3 Pro Eye , PICO 4 Pro");
@@ -103,6 +109,12 @@ namespace Unity.XR.PXR.Editor
             var handContent = new GUIContent();
             handContent.text = "Hand Tracking";
             projectConfig.handTracking = EditorGUILayout.Toggle(handContent, projectConfig.handTracking);
+
+            //body tracking
+            var bodyContent = new GUIContent();
+            bodyContent.text = "Body Tracking";
+            projectConfig.bodyTraching = EditorGUILayout.Toggle(bodyContent, projectConfig.bodyTraching);
+            manager.bodyTracking = projectConfig.bodyTraching;
 
             // content protect
             projectConfig.useContentProtect = EditorGUILayout.Toggle("Use Content Protect", projectConfig.useContentProtect);

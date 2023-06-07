@@ -1,21 +1,20 @@
-﻿/*******************************************************************************
-Copyright © 2015-2022 PICO Technology Co., Ltd.All rights reserved.  
+/*******************************************************************************
+Copyright © 2015-2022 PICO Technology Co., Ltd.All rights reserved.
 
-NOTICE：All information contained herein is, and remains the property of 
-PICO Technology Co., Ltd. The intellectual and technical concepts 
-contained herein are proprietary to PICO Technology Co., Ltd. and may be 
-covered by patents, patents in process, and are protected by trade secret or 
-copyright law. Dissemination of this information or reproduction of this 
+NOTICE：All information contained herein is, and remains the property of
+PICO Technology Co., Ltd. The intellectual and technical concepts
+contained herein are proprietary to PICO Technology Co., Ltd. and may be
+covered by patents, patents in process, and are protected by trade secret or
+copyright law. Dissemination of this information or reproduction of this
 material is strictly forbidden unless prior written permission is obtained from
-PICO Technology Co., Ltd. 
+PICO Technology Co., Ltd.
 *******************************************************************************/
 
-using System.Collections;
-using System.Collections.Generic;
+using Unity.XR.PXR;
 using UnityEditor;
 using UnityEngine;
 
-namespace Unity.XR.PXR.Editor
+namespace Pico.Platform.Editor
 {
     [CustomEditor(typeof(PXR_PlatformSetting))]
     public class PXR_PlatformSettingEditor : UnityEditor.Editor
@@ -27,16 +26,10 @@ namespace Unity.XR.PXR.Editor
             deviceSNList = serializedObject.FindProperty("deviceSN");
         }
 
-        [MenuItem("PXR_SDK" + "/Platform Settings")]
-        public static void Edit()
-        {
-            Selection.activeObject = PXR_PlatformSetting.Instance;
-        }
-
         public override void OnInspectorGUI()
         {
             var startEntitleCheckTip = "If selected, you will need to enter the APPID that is obtained from" +
-                                      " PICO Developer Platform after uploading the app for an entitlement check upon the app launch.";
+                                       " PICO Developer Platform after uploading the app for an entitlement check upon the app launch.";
             var startEntitleCheckLabel = new GUIContent("User Entitlement Check[?]", startEntitleCheckTip);
 
             PXR_PlatformSetting.Instance.startTimeEntitlementCheck =
@@ -56,12 +49,8 @@ namespace Unity.XR.PXR.Editor
                 if (PXR_PlatformSetting.Instance.appID == "")
                 {
                     EditorGUILayout.BeginHorizontal(GUILayout.Width(300));
-                    EditorGUILayout.HelpBox("APPID is required for Entitlement Check", MessageType.Error, true);
+                    EditorGUILayout.HelpBox("APPID is required for Entitlement Check", UnityEditor.MessageType.Error, true);
                     EditorGUILayout.EndHorizontal();
-                }
-                if (PXR_SDKSettingEditor.AppID != PXR_PlatformSetting.Instance.appID)
-                {
-                    PXR_SDKSettingEditor.AppID = PXR_PlatformSetting.Instance.appID;
                 }
 
                 EditorGUILayout.BeginHorizontal();
@@ -72,10 +61,11 @@ namespace Unity.XR.PXR.Editor
                 GUIStyle style = new GUIStyle();
                 style.normal.textColor = new Color(0, 122f / 255f, 204f / 255f);
                 if (GUILayout.Button("" + "https://developer.pico-interactive.com/developer/overview", style,
-                    GUILayout.Width(200)))
+                        GUILayout.Width(200)))
                 {
                     Application.OpenURL("https://developer.pico-interactive.com/developer/overview");
                 }
+
                 EditorGUILayout.EndHorizontal();
 
                 EditorGUILayout.BeginHorizontal();
@@ -105,5 +95,3 @@ namespace Unity.XR.PXR.Editor
         }
     }
 }
-
-

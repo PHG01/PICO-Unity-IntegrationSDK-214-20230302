@@ -86,11 +86,13 @@ namespace Pico.Platform
 
             return new Task<UserList>(CLIB.ppf_User_GetLoggedInUserFriends());
         }
-        
+
         /// <summary>
-        /// Get user relations to current user based on user ids passed as parameter.
+        /// Gets the relationship between the current user and other users.
         /// </summary>
-        /// <param name="userIds">An array of strings representing the user ids.</param>
+        /// <param name="userIds">The list of user IDs.
+        /// The request queries the current user's relationship with specified users.
+        /// A single request can pass no more than 20 user IDs.</param>
         /// <returns>`UserRelationResult` which is a dictionary of user relationships.</returns>
         public static Task<UserRelationResult> GetUserRelations(string[] userIds)
         {
@@ -210,7 +212,7 @@ namespace Pico.Platform
         /// <summary>
         /// Requests user permissions. The user will received a pop-up notification window.
         /// </summary>
-        /// <param name="permissionList">The list of permissions to request, including:
+        /// <param name="permissionList">The list of permissions to request. You can use constants in \ref Pico.Platform.Models.Permissions. The permissions includes:
         /// * `user_info`: the permission to get the user's basic information, such as the nickname and profile picture.
         /// * `friend_relation`: the permission to get the user's friend list and invitable users.
         /// * `sports_userinfo`: the permission to get the user's information set in the sport center.
@@ -227,6 +229,26 @@ namespace Pico.Platform
 
             return new Task<PermissionResult>(CLIB.ppf_User_RequestUserPermissions(permissionList));
         }
-    }
 
+        /// <summary>
+        /// Checks whether the current user is entitled to use the current app.
+        ///
+        /// If the user is not entitled, the system will close the app and show a dialog box to remind the user to buy the app from the PICO Store.
+        /// For customizations, you can set param `killApp` to `false` and then customize the dialog.
+        /// </summary>
+        /// <param name="killApp">Determines whether the system closes the app if the user fails to pass the entitlement check.
+        /// The default value is `true`.
+        /// </param>
+        /// <returns>The entitlement check result.</returns>
+        public static Task<EntitlementCheckResult> EntitlementCheck(bool killApp = true)
+        {
+            if (!CoreService.Initialized)
+            {
+                Debug.LogError(CoreService.NotInitializedError);
+                return null;
+            }
+
+            return new Task<EntitlementCheckResult>(CLIB.ppf_User_EntitlementCheck(killApp));
+        }
+    }
 }

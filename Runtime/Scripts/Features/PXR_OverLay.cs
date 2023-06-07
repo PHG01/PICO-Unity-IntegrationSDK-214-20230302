@@ -50,6 +50,8 @@ namespace Unity.XR.PXR
         public Vector4 colorScale = Vector4.one;
         public Vector4 colorOffset = Vector4.zero;
 
+        public float overlapFactor = 0;
+
         private Vector4 overlayLayerColorScaleDefault = Vector4.one;
         private Vector4 overlayLayerColorOffsetDefault = Vector4.zero;
 
@@ -299,9 +301,20 @@ namespace Unity.XR.PXR
             for (int i = 0; i < mvMatrixs.Length; i++)
             {
                 mvMatrixs[i] = overlayEyeCamera[i].worldToCameraMatrix * overlayTransform.localToWorldMatrix;
-                modelScales[i] = overlayTransform.localScale;
+                if (overlayTransform is RectTransform uiTransform)
+                {
+                    var rect = uiTransform.rect;
+                    var lossyScale = overlayTransform.lossyScale;
+                    modelScales[i] = new Vector3(rect.width * lossyScale.x,
+                        rect.height * lossyScale.y, 1);
+                    modelTranslations[i] = uiTransform.TransformPoint(rect.center);
+                }
+                else
+                {
+                    modelScales[i] = overlayTransform.lossyScale;
+                    modelTranslations[i] = overlayTransform.position;
+                }
                 modelRotations[i] = overlayTransform.rotation;
-                modelTranslations[i] = overlayTransform.position;
                 cameraRotations[i] = overlayEyeCamera[i].transform.rotation;
                 cameraTranslations[i] = overlayEyeCamera[i].transform.position;
             }
@@ -376,6 +389,11 @@ namespace Unity.XR.PXR
             if (!isDynamic && copiedRT)
             {
                 return copiedRT;
+            }
+
+            if (null == nativeTextures)
+            {
+                return false;
             }
 
             for (int i = 0; i < eyeCount; i++)
@@ -480,6 +498,11 @@ namespace Unity.XR.PXR
             colorOffset = offset;
         }
 
+        public void SetEACFactor(float factor)
+        {
+            overlapFactor = factor;
+        }
+
         public Vector4 GetLayerColorScale()
         {
             if (!overrideColorScaleAndOffset)
@@ -523,7 +546,8 @@ namespace Unity.XR.PXR
             Quad = 1,
             Cylinder = 2,
             Equirect = 3,
-            Cubemap = 5
+            Cubemap = 5,
+            Eac = 6
         }
 
         public enum OverlayType

@@ -34,6 +34,9 @@ namespace Unity.XR.PXR
                     instance = FindObjectOfType<PXR_Manager>();
                     if (instance == null)
                     {
+                        GameObject go = new GameObject("[PXR_Manager]");
+                        DontDestroyOnLoad(go);
+                        instance = go.AddComponent<PXR_Manager>();
                         Debug.LogError("PXRLog instance is not initialized!");
                     }
                 }
@@ -51,12 +54,6 @@ namespace Unity.XR.PXR
         private DepthTextureMode m_CachedDepthTextureMode;
 
         [HideInInspector]
-        public bool showFps;
-        [HideInInspector]
-        public bool useDefaultFps = true;
-        [HideInInspector]
-        public int customFps;
-        [HideInInspector]
         public bool screenFade;
         [HideInInspector]
         public bool eyeTracking;
@@ -68,6 +65,8 @@ namespace Unity.XR.PXR
         public bool lipsyncTracking;
         [HideInInspector]
         public bool lateLatching;
+        [HideInInspector]
+        public bool bodyTracking;
         [HideInInspector]
         public FoveationLevel foveationLevel = FoveationLevel.None;
 
@@ -143,7 +142,8 @@ namespace Unity.XR.PXR
             eyeCamera = new Camera[3];
             Camera[] cam = gameObject.GetComponentsInChildren<Camera>();
             for (int i = 0; i < cam.Length; i++) {
-                if (cam[i].stereoTargetEye == StereoTargetEyeMask.Both) {
+                if (cam[i].stereoTargetEye == StereoTargetEyeMask.Both && cam[i] == Camera.main)
+                {
                     eyeCamera[0] = cam[i];
                 }else if (cam[i].stereoTargetEye == StereoTargetEyeMask.Left)
                 {
@@ -173,6 +173,12 @@ namespace Unity.XR.PXR
                 }
             }
 
+            if (bodyTracking)
+            {
+                PXR_Plugin.Controller.UPxr_SetBodyTrackingMode(1);
+            }
+
+            Debug.LogFormat("PXR MRC Awake openMRC = {0} ,MRCInitSucceed = {1}.", openMRC, MRCInitSucceed);
             if (openMRC && MRCInitSucceed == false)
             {
                 UPxr_MRCPoseInitialize();
@@ -193,6 +199,7 @@ namespace Unity.XR.PXR
 
         private void OnApplicationQuit()
         {
+            Debug.LogFormat("PXR MRC OnApplicationQuit openMRC = {0} ,MRCInitSucceed = {1}.", openMRC, MRCInitSucceed);
             if (openMRC && MRCInitSucceed)
             {
                 PXR_Plugin.Render.UPxr_DestroyLayer(99999);
@@ -221,31 +228,6 @@ namespace Unity.XR.PXR
 
         void Start()
         {
-            bool systemFps = false;
-#if UNITY_ANDROID && !UNITY_EDITOR
-            PXR_Plugin.System.UPxr_GetTextSize("");//load res & get permission of external storage
-            systemFps = Convert.ToBoolean(Convert.ToInt16(PXR_Plugin.System.UPxr_GetConfigInt(ConfigType.ShowFps)));
-#endif
-            if (systemFps || showFps)
-            {
-                Camera.main.transform.Find("FPS").gameObject.SetActive(true);
-            }
-
-            if (PXR_PlatformSetting.Instance.startTimeEntitlementCheck)
-            {
-                if (PXR_Plugin.PlatformSetting.UPxr_IsCurrentDeviceValid() != PXR_PlatformSetting.simulationType.Valid)
-                {
-                    Debug.Log("PXRLog Entitlement Check Simulation DO NOT PASS");
-                    string appID = PXR_PlatformSetting.Instance.appID;
-                    Debug.Log("PXRLog Entitlement Check Enable");
-                    // 0:success -1:invalid params -2:service not exist -3:time out
-                    PXR_Plugin.PlatformSetting.UPxr_AppEntitlementCheckExtra(appID);
-                }
-                else
-                {
-                    Debug.Log("PXRLog Entitlement Check Simulation PASS");
-                }
-            }
 #if UNITY_EDITOR
             Application.targetFrameRate = 72;
 #endif
@@ -461,7 +443,7 @@ namespace Unity.XR.PXR
             PXR_Plugin.System.UPxr_SetMrcTextutrHeight(textureHeight);
             UPxr_CreateMRCOverlay((uint)xmlCameraData.imageWidth, (uint)xmlCameraData.imageHeight);
             MRCInitSucceed = true;
-            Debug.Log("PXR_MRCInit Succeed");
+            Debug.Log("PXR MRC Init Succeed.");
         }
 
         public void UPxr_CreateMRCOverlay(uint width, uint height)
@@ -625,10 +607,10 @@ namespace Unity.XR.PXR
             CameraData cameraDataNew = new CameraData();
             string path = Application.persistentDataPath + "/mrc.xml";
             cameraAttribute = PXR_Plugin.PlatformSetting.UPxr_MRCCalibration(path);
-            Debug.Log("cameraDataLength: " + cameraAttribute.Length);
+            Debug.Log("PXR MRC cameraDataLength: " + cameraAttribute.Length);
             for (int i = 0; i < cameraAttribute.Length; i++)
             {
-                Debug.Log("cameraData: " + i.ToString() + ": " + cameraAttribute[i].ToString());
+                Debug.Log("PXR MRC cameraData: " + i.ToString() + ": " + cameraAttribute[i].ToString());
             }
             cameraDataNew.imageWidth = cameraAttribute[0];
             cameraDataNew.imageHeight = cameraAttribute[1];
@@ -743,7 +725,7 @@ namespace Unity.XR.PXR
             }
             mrcPlay = true;
 
-            Debug.Log("PxrMRC Camera create");
+            Debug.Log("PXR MRC Camera created. mrcPlay is true.");
         }
 
         public Vector3 UPxr_ToVector3(float[] translation)
@@ -763,7 +745,7 @@ namespace Unity.XR.PXR
         public void Pxr_GetHeight()
         {
             height = Camera.main.transform.localPosition.y - PXR_Plugin.System.UPxr_GetMrcY();
-            Debug.Log("Pxr_GetMrcY+:" + PXR_Plugin.System.UPxr_GetMrcY().ToString());
+            Debug.Log("PXR MRC Pxr_GetMrcY+:" + PXR_Plugin.System.UPxr_GetMrcY().ToString());
         }
 
         private void MRCUpdata() {
@@ -870,7 +852,7 @@ namespace Unity.XR.PXR
                     }
 
                     createMRCOverlaySucceed = true;
-                    Debug.Log("Pxr_GetMrcLayerImage : true");
+                    Debug.Log("PXR MRC Pxr_GetMrcLayerImage createMRCOverlaySucceed : true.");
                 }
             }
         }

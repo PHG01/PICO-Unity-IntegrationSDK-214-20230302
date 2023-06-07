@@ -14,9 +14,7 @@ using System;
 
 namespace Pico.Platform.Models
 {
-    /**
-     * \ingroup Models
-     */
+
     /// <summary>
     /// The add-on that can be purchased in the app.
     ///
@@ -24,48 +22,48 @@ namespace Pico.Platform.Models
     /// </summary>
     public class Product
     {
-        /**@brief The description of the add-on. */
+        /// The description of the add-on. 
         public readonly string Description;
 
-        /**@brief The detailed description of the add-on. */
+        /// The detailed description of the add-on. 
         public readonly string DetailDescription;
 
-        /**@brief The price of the add-on, which is a number string. */
+        /// The price of the add-on, which is a number string. 
         public readonly string Price;
 
-        /**@brief The currency required for purchasing the add-on. */
+        /// The currency required for purchasing the add-on. 
         public readonly string Currency;
 
-        /**@brief The name of the add-on. */
+        /// The name of the add-on. 
         public readonly string Name;
 
-        /**@brief The unique identifier of the add-on. */
+        /// The unique identifier of the add-on. 
         public readonly string SKU;
 
-        /**@brief The icon of the add-on, which is an image URL.*/
+        /// The icon of the add-on, which is an image URL.
         public readonly string Icon;
 
-        /**@brief The type of the add-on */
+        /// The type of the add-on 
         public readonly AddonsType AddonsType;
 
-        /**@brief The period type for the subscription add-on.*/
+        /// The period type for the subscription add-on.
         public readonly PeriodType PeriodType;
 
-        /**@brief The trial period unit for the subscription add-on.*/
+        /// The trial period unit for the subscription add-on.
         public readonly PeriodType TrialPeriodUnit;
 
-        /**@brief The trial period value for the subscription add-on.*/
+        /// The trial period value for the subscription add-on.
         public readonly int TrialPeriodValue;
 
-        /**@brief The original price of the add-on. This field means the price
+        /** The original price of the add-on. This field means the price
          * without discount.
          */
         public readonly string OriginalPrice;
 
-        /**@brief The unique identifier of a subscription period.*/
+        /// The unique identifier of a subscription period.
         public readonly string OuterId;
 
-        /**@brief Whether the subscription is auto renewed.*/
+        /// Whether the subscription is auto renewed.
         public readonly bool IsContinuous;
 
         public Product(IntPtr o)
@@ -87,7 +85,9 @@ namespace Pico.Platform.Models
         }
     }
 
-
+    /// <summary>
+    /// Each element is \ref Product.
+    /// </summary>
     public class ProductList : MessageArray<Product>
     {
         public ProductList(IntPtr a)
@@ -103,45 +103,43 @@ namespace Pico.Platform.Models
         }
     }
 
-    /**
-     * \ingroup Models
-     */
+
     /// <summary>
     /// The add-on that the current user has purchased.
     /// </summary>
     public class Purchase
     {
-        /**@brief The expiration time. Only valid when it's subscription type.*/
+        /// The expiration time. Only valid when it's subscription type.
         public readonly DateTime ExpirationTime;
 
-        /**@brief The grant time. Only valid when it's subscription type.*/
+        /// The grant time. Only valid when it's subscription type.
         public readonly DateTime GrantTime;
 
-        /** @brief The ID of the purchase order. */
+        /// The ID of the purchase order. 
         public readonly string ID;
 
-        /** @brief The unique identifier of the add-on in the purchase order. */
+        /// The unique identifier of the add-on in the purchase order. 
         public readonly string SKU;
 
-        /** @brief The icon of the add-on.*/
+        /// The icon of the add-on.
         public readonly string Icon;
 
-        /** @brief The type of the purchased add-on.*/
+        /// The type of the purchased add-on.
         public readonly AddonsType AddonsType;
 
-        /** @brief The outer id of the purchased add-on.*/
+        /// The outer id of the purchased add-on.
         public readonly string OuterId;
 
-        /** @brief The current period type of subscription. Only valid when it's subscription.*/
+        /// The current period type of subscription. Only valid when it's subscription.
         public readonly PeriodType CurrentPeriodType;
 
-        /** @brief The next period type of subscription. Only valid when it's subscription.*/
+        /// The next period type of subscription. Only valid when it's subscription.
         public readonly PeriodType NextPeriodType;
 
-        /** @brief The next pay time of subscription. Only valid when it's subscription.*/
+        /// The next pay time of subscription. Only valid when it's subscription.
         public readonly DateTime NextPayTime;
 
-        /**@brief The discount info of the purchase.*/
+        /// The discount info of the purchase.
         public readonly DiscountType DiscountType;
 
         public Purchase(IntPtr o)
@@ -160,7 +158,9 @@ namespace Pico.Platform.Models
         }
     }
 
-
+    /// <summary>
+    /// Each element is \ref Purchase.
+    /// </summary>
     public class PurchaseList : MessageArray<Purchase>
     {
         public PurchaseList(IntPtr a)
@@ -173,6 +173,52 @@ namespace Pico.Platform.Models
             }
 
             NextPageParam = CLIB.ppf_PurchaseArray_GetNextPageParam(a);
+        }
+    }
+
+    /// <summary>
+    /// \ref IAPService.GetSubscriptionStatus returns the subscription status of a subscription add-on.
+    /// </summary>
+    public class SubscriptionStatus
+    {
+        /// The SKU of the add-on. SKU is the add-on's unique identifier.
+        public readonly string SKU;
+
+        /// The order ID of the subscription.
+        public readonly string OuterId;
+
+        /// The start time of the subscription.
+        public readonly DateTime StartTime;
+
+        /// The end time of the subscription.
+        public readonly DateTime EndTime;
+
+        /// The period type of the subscription. 
+        public readonly PeriodType PeriodType;
+
+        /// The entitlement status of the add-on, which indicates whether the user is entitled to use the add-on.
+        public readonly EntitlementStatus EntitlementStatus;
+
+        /// If `EntitlementStatus` is `Cancel`, `CancelReason` indicates why the subscription has been canceled.
+        public readonly CancelReason CancelReason;
+
+        /// Whether the subscription is in free trial.
+        public readonly bool IsFreeTrial;
+
+        /// The next period of the subscription.
+        public readonly int NextPeriod;
+
+        public SubscriptionStatus(IntPtr o)
+        {
+            SKU = CLIB.ppf_SubscriptionStatus_GetSKU(o);
+            OuterId = CLIB.ppf_SubscriptionStatus_GetOuterId(o);
+            StartTime = TimeUtil.MilliSecondsToDateTime(CLIB.ppf_SubscriptionStatus_GetStartTime(o));
+            EndTime = TimeUtil.MilliSecondsToDateTime(CLIB.ppf_SubscriptionStatus_GetEndTime(o));
+            PeriodType = CLIB.ppf_SubscriptionStatus_GetPeriodType(o);
+            EntitlementStatus = CLIB.ppf_SubscriptionStatus_GetEntitlementStatus(o);
+            CancelReason = CLIB.ppf_SubscriptionStatus_GetCancelReason(o);
+            IsFreeTrial = CLIB.ppf_SubscriptionStatus_GetIsFreeTrial(o);
+            NextPeriod = CLIB.ppf_SubscriptionStatus_GetNextPeriod(o);
         }
     }
 }
