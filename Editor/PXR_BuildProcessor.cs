@@ -220,16 +220,17 @@ namespace Unity.XR.PXR.Editor
             var settings = PXR_XmlTools.GetSettings();
             doc.InsertAttributeInTargetTag(applicationTagPath,null, new Dictionary<string, string>() {{"requestLegacyExternalStorage", "true"}});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","pvr.app.type"}},new Dictionary<string, string>{{"value","vr"}});
-            doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","pvr.sdk.version"}},new Dictionary<string, string>{{"value","XR Platform_2.1.5.3"}});
+            doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","pvr.sdk.version"}},new Dictionary<string, string>{{"value","XR Platform_2.2.3"}});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","enable_cpt"}},new Dictionary<string, string>{{"value",PXR_ProjectSetting.GetProjectConfig().useContentProtect ? "1" : "0"}});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","handtracking"}},new Dictionary<string, string> {{"value",PXR_ProjectSetting.GetProjectConfig().handTracking ? "1" : "0" }});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","rendering_mode"}},new Dictionary<string, string>{{"value",((int)settings.stereoRenderingModeAndroid).ToString()}});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","display_rate"}},new Dictionary<string, string>{{"value",((int)settings.systemDisplayFrequency).ToString()}});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","color_Space"}},new Dictionary<string, string>{{"value",QualitySettings.activeColorSpace == ColorSpace.Linear ? "1" : "0"}});
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","MRCsupport"}},new Dictionary<string, string>{{"value",PXR_ProjectSetting.GetProjectConfig().openMRC ? "1" : "0" }});
-            doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name", "pvr.LateLatchingDebug"}}, new Dictionary<string, string> {{"value","0"}});
+            doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","pvr.LateLatching"}}, new Dictionary<string, string> {{"value",PXR_ProjectSetting.GetProjectConfig().latelatching ? "1" : "0" } });
+            doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","pvr.LateLatchingDebug"}}, new Dictionary<string, string> {{"value", PXR_ProjectSetting.GetProjectConfig().latelatching && PXR_ProjectSetting.GetProjectConfig().latelatchingDebug ? "1" : "0" } });
             doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","pvr.app.splash"} },new Dictionary<string, string>{{"value",settings.GetSystemSplashScreen(path)}});
-            doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","PICO.swift.feature"}},new Dictionary<string, string>{{"value",PXR_ProjectSetting.GetProjectConfig().bodyTraching ? "1" : "0" }});
+            doc.InsertAttributeInTargetTag(metaDataTagPath,new Dictionary<string, string>{{"name","PICO.swift.feature"}},new Dictionary<string, string>{{"value",PXR_ProjectSetting.GetProjectConfig().bodyTracking ? "1" : "0" }});
             doc.CreateElementInTag(manifestTagPath,usesPermissionTagName,new Dictionary<string, string>{{"name","android.permission.WRITE_SETTINGS"}});
             if (PXR_ProjectSetting.GetProjectConfig().eyeTracking)
             {

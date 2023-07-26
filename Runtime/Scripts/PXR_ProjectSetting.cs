@@ -26,8 +26,9 @@ namespace Unity.XR.PXR
         public bool eyeTracking;
         public bool eyetrackingCalibration;
         public bool latelatching;
+        public bool latelatchingDebug;
         public bool enableSubsampled;
-        public bool bodyTraching;
+        public bool bodyTracking;
 
         public static PXR_ProjectSetting GetProjectConfig()
         {
@@ -44,8 +45,9 @@ namespace Unity.XR.PXR
                 projectConfig.eyeTracking = false;
                 projectConfig.eyetrackingCalibration = false;
                 projectConfig.latelatching = false;
+                projectConfig.latelatchingDebug = false;
                 projectConfig.enableSubsampled = false;
-                projectConfig.bodyTraching = false;
+                projectConfig.bodyTracking = false;
                 string path = Application.dataPath + "/Resources";
                 if (!Directory.Exists(path))
                 {

@@ -40,7 +40,11 @@ namespace Unity.XR.PXR
     /// Value range: [0,5]. `0` indicates a low battery, which can affect the tracking accuracy.
     /// </summary>
     public delegate void FitnessBandElectricQuantityCallBack(int trackerID, int battery);
-
+    /// <summary>
+    /// A callback function that notifies the change of loglevel state.
+    /// </summary>
+    public delegate void LoglevelChangedCallBack(int value);
+    
     public class PXR_System
     {
         /// <summary>
@@ -245,6 +249,16 @@ namespace Unity.XR.PXR
         /// </returns>
         public static int SetFaceTrackingStatus(PxrFtLipsyncValue value) {
             return PXR_Plugin.System.UPxr_SetFaceTrackingStatus(value);
+        }
+
+        /// <summary>
+        /// Set tile render
+        /// </summary>
+        /// <param name="isTileRender"></param>
+        /// <returns></returns>
+        public static int SetGLTileRender(bool isTileRender)
+        {
+            return PXR_Plugin.System.UPxr_SetGLTileRender(isTileRender);
         }
     }
 }

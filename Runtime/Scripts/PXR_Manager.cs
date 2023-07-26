@@ -24,7 +24,6 @@ namespace Unity.XR.PXR
     {
         private const string TAG = "[PXR_Manager]";
         private static PXR_Manager instance = null;
-        private static bool bindVerifyServiceSuccess = false;
         public static PXR_Manager Instance
         {
             get
@@ -46,9 +45,6 @@ namespace Unity.XR.PXR
 
         private float refreshRate = -1.0f;
         private Camera[] eyeCamera;
-        private int[] eyeCameraOriginCullingMask = new int[3];
-        private CameraClearFlags[] eyeCameraOriginClearFlag = new CameraClearFlags[3];
-
         private bool appSpaceWarp;
         private Transform m_AppSpaceTransform;
         private DepthTextureMode m_CachedDepthTextureMode;
@@ -66,6 +62,8 @@ namespace Unity.XR.PXR
         [HideInInspector]
         public bool lateLatching;
         [HideInInspector]
+        public bool latelatchingDebug;
+        [HideInInspector]
         public bool bodyTracking;
         [HideInInspector]
         public FoveationLevel foveationLevel = FoveationLevel.None;
@@ -78,7 +76,7 @@ namespace Unity.XR.PXR
         public LayerMask foregroundLayerMask = -1;
         [HideInInspector]
         public LayerMask backLayerMask = -1;
-        private static bool MRCInitSucceed = false;
+        private static bool initMRCSucceed = false;
 
         private Texture[] swapChain = new Texture[2];
         private struct LayerTexture
@@ -90,36 +88,25 @@ namespace Unity.XR.PXR
         private int imageIndex;
         private UInt32 imageCounts = 0;
 
-        private static CameraData xmlCameraData;
-        private static float imageW;
-        private static float imageH;
+        private static CameraData xmlCamData;
 
-        private bool mrcPlay = false;
+        private bool mrcCamObjActived = false;
         private float[] cameraAttribute;
         private PxrLayerParam layerParam = new PxrLayerParam();
-        private float yFov = 53f;
         [HideInInspector]
-        public GameObject backCameraObj = null;
+        public GameObject backgroundCamObj = null;
         [HideInInspector]
-        public GameObject foregroundCameraObj = null;
+        public GameObject foregroundCamObj = null;
         [HideInInspector]
-        public RenderTexture mrcRenderTexture = null;
+        public RenderTexture mrcBackgroundRT = null;
         [HideInInspector]
-        public RenderTexture foregroundMrcRenderTexture = null;
+        public RenderTexture mrcForegroundRT = null;
         private Color foregroundColor = new Color(0, 1, 0, 1);
         private static float height;
-        private static bool layerImageEnable = true;
-
 
         #endregion
 
         private bool isNeedResume = false;
-
-        //Entitlement Check Result
-        [HideInInspector]
-        public int appCheckResult = 100;
-        public delegate void EntitlementCheckResult(int ReturnValue);
-        public static event EntitlementCheckResult EntitlementCheckResultEvent;
 
         public Action<float> DisplayRefreshRateChanged;
 
@@ -135,21 +122,19 @@ namespace Unity.XR.PXR
             int logLevel = PXR_Plugin.System.UPxr_GetConfigInt(ConfigType.UnityLogLevel);
             Debug.Log("PXRLog XR Platform----SDK logLevel:" + logLevel);
             PLog.logLevel = (PLog.LogLevel)logLevel;
-            if (!bindVerifyServiceSuccess)
-            {
-                PXR_Plugin.PlatformSetting.UPxr_BindVerifyService(gameObject.name);
-            }
             eyeCamera = new Camera[3];
             Camera[] cam = gameObject.GetComponentsInChildren<Camera>();
-            for (int i = 0; i < cam.Length; i++) {
+            for (int i = 0; i < cam.Length; i++)
+            {
                 if (cam[i].stereoTargetEye == StereoTargetEyeMask.Both && cam[i] == Camera.main)
                 {
                     eyeCamera[0] = cam[i];
-                }else if (cam[i].stereoTargetEye == StereoTargetEyeMask.Left)
+                }
+                else if (cam[i].stereoTargetEye == StereoTargetEyeMask.Left)
                 {
                     eyeCamera[1] = cam[i];
                 }
-                else if(cam[i].stereoTargetEye == StereoTargetEyeMask.Right)
+                else if (cam[i].stereoTargetEye == StereoTargetEyeMask.Right)
                 {
                     eyeCamera[2] = cam[i];
                 }
@@ -178,11 +163,12 @@ namespace Unity.XR.PXR
                 PXR_Plugin.Controller.UPxr_SetBodyTrackingMode(1);
             }
 
-            Debug.LogFormat("PXR MRC Awake openMRC = {0} ,MRCInitSucceed = {1}.", openMRC, MRCInitSucceed);
-            if (openMRC && MRCInitSucceed == false)
+            Debug.LogFormat(TAG_MRC + "Awake openMRC = {0} ,MRCInitSucceed = {1}.", openMRC, initMRCSucceed);
+            if (openMRC && initMRCSucceed == false)
             {
-                UPxr_MRCPoseInitialize();
+                MRCInitialize();
             }
+            PXR_Plugin.System.UPxr_LogSdkApi("pico_msaa|" + QualitySettings.antiAliasing.ToString());
         }
 
         void OnApplicationPause(bool pause)
@@ -199,10 +185,10 @@ namespace Unity.XR.PXR
 
         private void OnApplicationQuit()
         {
-            Debug.LogFormat("PXR MRC OnApplicationQuit openMRC = {0} ,MRCInitSucceed = {1}.", openMRC, MRCInitSucceed);
-            if (openMRC && MRCInitSucceed)
+            Debug.LogFormat(TAG_MRC + "OnApplicationQuit openMRC = {0} ,MRCInitSucceed = {1}.", openMRC, initMRCSucceed);
+            if (openMRC && initMRCSucceed)
             {
-                PXR_Plugin.Render.UPxr_DestroyLayer(99999);
+                PXR_Plugin.Render.UPxr_DestroyLayer(LAYER_MRC);
             }
         }
 
@@ -233,7 +219,7 @@ namespace Unity.XR.PXR
 #endif
             PXR_Plugin.Controller.UPxr_SetControllerDelay();
         }
-        
+
         void Update()
         {
             if (Math.Abs(refreshRate - PXR_Plugin.System.UPxr_RefreshRateChanged()) > 0.1f)
@@ -252,14 +238,7 @@ namespace Unity.XR.PXR
                 PXR_Plugin.System.UPxr_InitHomeKey();
             }
 
-            //MRC
-            if (openMRC && MRCInitSucceed) {
-                UPxr_GetLayerImage();
-                if (createMRCOverlaySucceed)
-                {
-                    MRCUpdata();
-                }
-            }
+            UpdateMRCCam();
         }
 
         void OnEnable()
@@ -286,10 +265,21 @@ namespace Unity.XR.PXR
 
             if (openMRC)
             {
-                UPxr_MRCDataBinding();
+                if (GraphicsSettings.renderPipelineAsset != null)
+                {
+                    RenderPipelineManager.beginFrameRendering += BeginRendering;
+                    RenderPipelineManager.endFrameRendering += EndRendering;
+                }
+                else
+                {
+                    Camera.onPreRender += OnPreRenderCallBack;
+                    Camera.onPostRender += OnPostRenderCallBack;
+                }
+
+                PXR_Plugin.System.RecenterSuccess += CalibrationMRCCam;
             }
 
-            PXR_Plugin.System.SeethroughStateChangedChanged += SeeThroughStateChangedCallback;
+            PXR_Plugin.System.LoglevelChangedChanged += LoglevelChangedCallback;
         }
 
         private void LateUpdate()
@@ -337,67 +327,29 @@ namespace Unity.XR.PXR
         void OnDisable()
         {
             StopAllCoroutines();
-            if (openMRC) {
-                UPxr_UnMRCDataBinding();
-            }
 
-            PXR_Plugin.System.SeethroughStateChangedChanged -= SeeThroughStateChangedCallback;
-        }   
-        
-        //bind verify service success call back
-        void BindVerifyServiceCallback()
-        {
-            bindVerifyServiceSuccess = true;
-        }
-
-        void SeeThroughStateChangedCallback(int value)
-        {
-            try
+            if (openMRC)
             {
-                for (int i = 0; i < 3; i++)
+                if (GraphicsSettings.renderPipelineAsset != null)
                 {
-                    if (eyeCamera[i] != null && eyeCamera[i].enabled)
-                    {
-                        PLog.d(TAG,"SeeThroughStateChangedCallback State "+value);
-                        if (value == 2)
-                        {
-                            if (eyeCamera[i].clearFlags != CameraClearFlags.Nothing)
-                            {
-                                PLog.d(TAG, "eyeCamera stop rendering");
-                                eyeCameraOriginClearFlag[i] = eyeCamera[i].clearFlags;
-                                eyeCameraOriginCullingMask[i] = eyeCamera[i].cullingMask;
-
-                                eyeCamera[i].cullingMask = 0;
-                                eyeCamera[i].clearFlags = CameraClearFlags.Nothing;
-                            }
-                        }
-                        else
-                        {
-                            if (eyeCamera[i].clearFlags == CameraClearFlags.Nothing)
-                            {
-                                PLog.d(TAG, "eyeCamera start rendering");
-                                eyeCamera[i].clearFlags = eyeCameraOriginClearFlag[i];
-                                eyeCamera[i].cullingMask = eyeCameraOriginCullingMask[i];
-                            }
-                        }
-                    }
+                    RenderPipelineManager.beginFrameRendering -= BeginRendering;
+                    RenderPipelineManager.endFrameRendering -= EndRendering;
                 }
-            }
-            catch (Exception e)
-            {
-                Debug.Log("PXRLog SeeThroughStateChangedCallback Error"+e.ToString());
+                else
+                {
+                    Camera.onPreRender -= OnPreRenderCallBack;
+                    Camera.onPostRender -= OnPostRenderCallBack;
+                }
+                PXR_Plugin.System.RecenterSuccess -= CalibrationMRCCam;
             }
 
+            PXR_Plugin.System.LoglevelChangedChanged -= LoglevelChangedCallback;
         }
 
-        private void verifyAPPCallback(string callback)
+        void LoglevelChangedCallback(int value)
         {
-            Debug.Log("PXRLog verifyAPPCallback callback = " + callback);
-            appCheckResult = Convert.ToInt32(callback);
-            if (EntitlementCheckResultEvent != null)
-            {
-                EntitlementCheckResultEvent(appCheckResult);
-            }
+            PLog.logLevel = (PLog.LogLevel)value;
+            PLog.i(TAG, "LoglevelChangedCallback value " + value);
         }
 
         public Camera[] GetEyeCamera()
@@ -407,325 +359,329 @@ namespace Unity.XR.PXR
 
 
         #region MRC FUNC
-        public void UPxr_MRCPoseInitialize()
+        private const string TAG_MRC = "PXR MRC ";
+        private const int LAYER_MRC = 99999;
+
+        public void MRCInitialize()
         {
-            layerImageEnable = true;
-            xmlCameraData = new CameraData();
-            xmlCameraData.translation = new float[3];
-            xmlCameraData.rotation = new float[4];
-            UPxr_ReadXML(out xmlCameraData);
+            xmlCamData = new CameraData();
+            string path = Application.persistentDataPath + "/mrc.xml";
+            cameraAttribute = PXR_Plugin.PlatformSetting.UPxr_MRCCalibration(path);
+            PLog.i(TAG_MRC, "cameraDataLength: " + cameraAttribute.Length);
+            for (int i = 0; i < cameraAttribute.Length; i++)
+            {
+                PLog.i(TAG_MRC, "cameraData: " + i.ToString() + ": " + cameraAttribute[i].ToString());
+            }
+            xmlCamData.imageW = cameraAttribute[0];
+            xmlCamData.imageH = cameraAttribute[1];
+            xmlCamData.yFov = cameraAttribute[2];
+            xmlCamData.position.x = cameraAttribute[3];
+            xmlCamData.position.y = cameraAttribute[4];
+            xmlCamData.position.z = cameraAttribute[5];
+            xmlCamData.orientation.x = cameraAttribute[6];
+            xmlCamData.orientation.y = cameraAttribute[7];
+            xmlCamData.orientation.z = cameraAttribute[8];
+            xmlCamData.orientation.w = cameraAttribute[9];
+
             Invoke("Pxr_GetHeight", 0.5f);
             PXR_Plugin.System.UPxr_SetIsSupportMovingMrc(true);
             PxrPosef pose = new PxrPosef();
-            pose.orientation.x = xmlCameraData.rotation[0];
-            pose.orientation.y = xmlCameraData.rotation[1];
-            pose.orientation.z = xmlCameraData.rotation[2];
-            pose.orientation.w = xmlCameraData.rotation[3];
-            pose.position.x = xmlCameraData.translation[0];
-            pose.position.y = xmlCameraData.translation[1];
-            pose.position.z = xmlCameraData.translation[2];
+            pose.position = xmlCamData.position;
+            pose.orientation = xmlCamData.orientation;
             PXR_Plugin.System.UPxr_SetMrcPose(ref pose);
-
             PXR_Plugin.System.UPxr_GetMrcPose(ref pose);
-            xmlCameraData.rotation[0] = pose.orientation.x;
-            xmlCameraData.rotation[1] = pose.orientation.y;
-            xmlCameraData.rotation[2] = pose.orientation.z;
-            xmlCameraData.rotation[3] = pose.orientation.w;
-            xmlCameraData.translation[0] = pose.position.x;
-            xmlCameraData.translation[1] = pose.position.y;
-            xmlCameraData.translation[2] = pose.position.z;
-            mrcPlay = false;
-            UInt64 textureWidth = (UInt64)xmlCameraData.imageWidth;
-            UInt64 textureHeight = (UInt64)xmlCameraData.imageHeight;
-            imageW = xmlCameraData.imageWidth;
-            imageH = xmlCameraData.imageHeight;
-            PXR_Plugin.System.UPxr_SetMrcTextutrWidth(textureWidth);
-            PXR_Plugin.System.UPxr_SetMrcTextutrHeight(textureHeight);
-            UPxr_CreateMRCOverlay((uint)xmlCameraData.imageWidth, (uint)xmlCameraData.imageHeight);
-            MRCInitSucceed = true;
-            Debug.Log("PXR MRC Init Succeed.");
-        }
+            xmlCamData.position = pose.position;
+            xmlCamData.orientation = pose.orientation;
+            mrcCamObjActived = false;
 
-        public void UPxr_CreateMRCOverlay(uint width, uint height)
-        {
-            if (width <= 0 || height <= 0) {
-                layerImageEnable = false;
-                Debug.Log("PXR MRC Abnormal calibration data");
+            PXR_Plugin.System.UPxr_SetMrcTextutrWidth((ulong)xmlCamData.imageW);
+            PXR_Plugin.System.UPxr_SetMrcTextutrHeight((ulong)xmlCamData.imageH);
+
+            if (xmlCamData.imageW <= 0 || xmlCamData.imageH <= 0)
+            {
+                initMRCSucceed = false;
+                PLog.e(TAG_MRC, "Abnormal calibration data, so MRC init failed!");
                 return;
             }
-            layerParam.layerId = 99999;
+            layerParam.layerId = LAYER_MRC;
             layerParam.layerShape = PXR_OverLay.OverlayShape.Quad;
             layerParam.layerType = PXR_OverLay.OverlayType.Overlay;
             layerParam.layerLayout = PXR_OverLay.LayerLayout.Stereo;
             layerParam.format = (UInt64)RenderTextureFormat.Default;
-            layerParam.width = width;
-            layerParam.height = height;
+            layerParam.width = (uint)xmlCamData.imageW;
+            layerParam.height = (uint)xmlCamData.imageH;
             layerParam.sampleCount = 1;
             layerParam.faceCount = 1;
             layerParam.arraySize = 1;
             layerParam.mipmapCount = 0;
             layerParam.layerFlags = 0;
             PXR_Plugin.Render.UPxr_CreateLayerParam(layerParam);
-        }
 
-        public void UPxr_MRCDataBinding() {
-            if (GraphicsSettings.renderPipelineAsset != null)
-            {
-                RenderPipelineManager.beginFrameRendering += BeginRendering;
-            }
-            else
-            {
-                Camera.onPostRender += UPxr_CopyMRCTexture;
-            }
-            PXR_Plugin.System.RecenterSuccess += UPxr_Calibration;
-        }
-
-        public void UPxr_UnMRCDataBinding()
-        {
-            if (GraphicsSettings.renderPipelineAsset != null)
-            {
-                RenderPipelineManager.beginFrameRendering -= BeginRendering;
-            }
-            else
-            {
-                Camera.onPostRender -= UPxr_CopyMRCTexture;
-            }
-            PXR_Plugin.System.RecenterSuccess -= UPxr_Calibration;
+            initMRCSucceed = true;
+            PLog.i(TAG_MRC, "Init Succeed.");
         }
 
         private void BeginRendering(ScriptableRenderContext arg1, Camera[] arg2)
         {
             foreach (Camera cam in arg2)
             {
-                if (cam != null && Camera.main.tag == cam.tag)
+                if (cam != null && Camera.main == cam)
                 {
-                    UPxr_CopyMRCTexture(cam);
+                    OnPreRenderCallBack(cam);
                 }
             }
         }
 
-        public void UPxr_CopyMRCTexture(Camera cam)
+        private void EndRendering(ScriptableRenderContext arg1, Camera[] arg2)
         {
-            if (createMRCOverlaySucceed && PXR_Plugin.System.UPxr_GetMRCEnable())
+            foreach (Camera cam in arg2)
             {
-                if (cam == null || cam.tag != Camera.main.tag || cam.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right) return;
-                PXR_Plugin.Render.UPxr_GetLayerNextImageIndex(99999, ref imageIndex);
-
-                for (int eyeId = 0; eyeId < 2; ++eyeId)
+                if (cam != null && Camera.main == cam)
                 {
-                    Texture dstT = layerTexturesInfo[eyeId].swapChain[imageIndex];
-
-                    if (dstT == null)
-                        continue;
-                    RenderTexture rt;
-                    if (eyeId == 0)
-                    {
-                        rt = mrcRenderTexture as RenderTexture;
-                    }
-                    else
-                    {
-                        rt = foregroundMrcRenderTexture as RenderTexture;
-                    }
-                    RenderTexture tempRT = null;
-
-                    if (!(QualitySettings.activeColorSpace == ColorSpace.Gamma && rt != null && rt.format == RenderTextureFormat.ARGB32))
-                    {
-                        RenderTextureDescriptor descriptor = new RenderTextureDescriptor((int)imageW, (int)imageH, RenderTextureFormat.ARGB32, 0);
-                        descriptor.msaaSamples = 1;
-                        descriptor.useMipMap = false;
-                        descriptor.autoGenerateMips = false;
-                        descriptor.sRGB = false;
-                        tempRT = RenderTexture.GetTemporary(descriptor);
-
-                        if (!tempRT.IsCreated())
-                        {
-                            tempRT.Create();
-                        }
-                        if (eyeId == 0)
-                        {
-                            mrcRenderTexture.DiscardContents();
-                        }
-                        else
-                        {
-                            foregroundMrcRenderTexture.DiscardContents();
-                        }
-                        tempRT.DiscardContents();
-
-                        if (eyeId == 0)
-                        {
-                            Graphics.Blit(mrcRenderTexture, tempRT);
-                            Graphics.CopyTexture(tempRT, 0, 0, dstT, 0, 0);
-                        }
-                        else
-                        {
-                            Graphics.Blit(foregroundMrcRenderTexture, tempRT);
-                            Graphics.CopyTexture(tempRT, 0, 0, dstT, 0, 0);
-                        }
-                    }
-                    else
-                    {
-                        if (eyeId == 0)
-                        {
-                            Graphics.CopyTexture(mrcRenderTexture, 0, 0, dstT, 0, 0);
-                        }
-                        else
-                        {
-                            Graphics.CopyTexture(foregroundMrcRenderTexture, 0, 0, dstT, 0, 0);
-                        }
-                    }
-
-                    if (tempRT != null)
-                    {
-                        RenderTexture.ReleaseTemporary(tempRT);
-                    }
+                    OnPostRenderCallBack(cam);
                 }
-                PxrLayerQuad layerSubmit = new PxrLayerQuad();
-                layerSubmit.header.layerId = 99999;
-                layerSubmit.header.layerFlags = (UInt32)PxrLayerSubmitFlagsEXT.PxrLayerFlagMRCComposition;
-                layerSubmit.width = 1.0f;
-                layerSubmit.height = 1.0f;
-                layerSubmit.header.colorScaleX = 1.0f;
-                layerSubmit.header.colorScaleY = 1.0f;
-                layerSubmit.header.colorScaleZ = 1.0f;
-                layerSubmit.header.colorScaleW = 1.0f;
-                layerSubmit.pose.orientation.w = 1.0f;
-                layerSubmit.header.headPose.orientation.x = 0;
-                layerSubmit.header.headPose.orientation.y = 0;
-                layerSubmit.header.headPose.orientation.z = 0;
-                layerSubmit.header.headPose.orientation.w = 1;
-                PXR_Plugin.Render.UPxr_SubmitLayerQuad(layerSubmit);
             }
-            else {
+        }
+
+        private void OnPreRenderCallBack(Camera cam)
+        {
+            if (!initMRCSucceed || createMRCOverlaySucceed) return;
+
+            if (null == layerTexturesInfo)
+            {
+                layerTexturesInfo = new LayerTexture[2];
+            }
+
+            for (int i = 0; i < 2; i++)
+            {
+                int ret = PXR_Plugin.Render.UPxr_GetLayerImageCount(LAYER_MRC, (EyeType)i, ref imageCounts);
+                if (ret != 0 || imageCounts < 1)
+                {
+                    PLog.e(TAG_MRC, "UPxr_GetLayerImageCount failed, i:" + i);
+                    continue;
+                }
+                if (layerTexturesInfo[i].swapChain == null)
+                {
+                    layerTexturesInfo[i].swapChain = new Texture[imageCounts];
+                }
+                for (int j = 0; j < imageCounts; j++)
+                {
+                    IntPtr ptr = IntPtr.Zero;
+                    PXR_Plugin.Render.UPxr_GetLayerImagePtr(LAYER_MRC, (EyeType)i, j, ref ptr);
+
+                    if (IntPtr.Zero == ptr)
+                    {
+                        PLog.e(TAG_MRC, "UPxr_GetLayerImagePtr is Zero, i:" + i);
+                        continue;
+                    }
+
+                    Texture texture = Texture2D.CreateExternalTexture((int)xmlCamData.imageW, (int)xmlCamData.imageH, TextureFormat.RGBA32, false, true, ptr);
+
+                    if (null == texture)
+                    {
+                        PLog.e(TAG_MRC, "CreateExternalTexture texture null, i:" + i);
+                        continue;
+                    }
+
+                    layerTexturesInfo[i].swapChain[j] = texture;
+                }
+
+                createMRCOverlaySucceed = true;
+                PLog.i(TAG_MRC, " UPxr_GetLayerImagePtr createMRCOverlaySucceed : true. i:" + i);
+            }
+        }
+
+        public void OnPostRenderCallBack(Camera cam)
+        {
+            if (!initMRCSucceed || !createMRCOverlaySucceed || !PXR_Plugin.System.UPxr_GetMRCEnable()) return;
+
+            if (cam == null || cam != Camera.main || cam.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right) return;
+
+            PXR_Plugin.Render.UPxr_GetLayerNextImageIndex(LAYER_MRC, ref imageIndex);
+
+            for (int eyeId = 0; eyeId < 2; ++eyeId)
+            {
+                Texture dstT = layerTexturesInfo[eyeId].swapChain[imageIndex];
+
+                if (dstT == null)
+                {
+                    PLog.e(TAG_MRC, "dstT is null, eyeId:" + eyeId);
+                    continue;
+                }
+
+                RenderTexture rt = (0 == eyeId) ? mrcBackgroundRT : mrcForegroundRT;
+
+                RenderTexture tempRT = null;
+
+                if (!(QualitySettings.activeColorSpace == ColorSpace.Gamma && rt != null && rt.format == RenderTextureFormat.ARGB32))
+                {
+                    RenderTextureDescriptor descriptor = new RenderTextureDescriptor((int)xmlCamData.imageW, (int)xmlCamData.imageH, RenderTextureFormat.ARGB32, 0);
+                    descriptor.msaaSamples = 1;
+                    descriptor.useMipMap = false;
+                    descriptor.autoGenerateMips = false;
+                    descriptor.sRGB = false;
+                    tempRT = RenderTexture.GetTemporary(descriptor);
+
+                    if (!tempRT.IsCreated())
+                    {
+                        tempRT.Create();
+                    }
+                    rt.DiscardContents();
+                    tempRT.DiscardContents();
+
+                    Graphics.Blit(rt, tempRT);
+                    Graphics.CopyTexture(tempRT, 0, 0, dstT, 0, 0);
+                }
+                else
+                {
+                    Graphics.CopyTexture(rt, 0, 0, dstT, 0, 0);
+                }
+
+                if (tempRT != null)
+                {
+                    RenderTexture.ReleaseTemporary(tempRT);
+                }
+            }
+
+            PxrLayerQuad layerSubmit = new PxrLayerQuad();
+            layerSubmit.header.layerId = LAYER_MRC;
+            layerSubmit.header.layerFlags = (UInt32)PxrLayerSubmitFlagsEXT.PxrLayerFlagMRCComposition;
+            layerSubmit.width = 1.0f;
+            layerSubmit.height = 1.0f;
+            layerSubmit.header.colorScaleX = 1.0f;
+            layerSubmit.header.colorScaleY = 1.0f;
+            layerSubmit.header.colorScaleZ = 1.0f;
+            layerSubmit.header.colorScaleW = 1.0f;
+            layerSubmit.pose.orientation.w = 1.0f;
+            layerSubmit.header.headPose.orientation.x = 0;
+            layerSubmit.header.headPose.orientation.y = 0;
+            layerSubmit.header.headPose.orientation.z = 0;
+            layerSubmit.header.headPose.orientation.w = 1;
+            PXR_Plugin.Render.UPxr_SubmitLayerQuad(layerSubmit);
+        }
+
+        private void UpdateMRCCam()
+        {
+            if (!openMRC || !initMRCSucceed) return;
+
+            if (!PXR_Plugin.System.UPxr_GetMRCEnable())
+            {
+                if (mrcCamObjActived)
+                {
+                    mrcCamObjActived = false;
+                    backgroundCamObj.SetActive(false);
+                    foregroundCamObj.SetActive(false);
+                }
                 return;
             }
+
+            if (null != Camera.main.transform && (null == backgroundCamObj || !mrcCamObjActived))
+            {
+                CreateMRCCam();
+            }
+
+            if (null != foregroundCamObj)
+            {
+                Vector3 cameraLookAt = Camera.main.transform.position - foregroundCamObj.transform.position;
+                float distance = Vector3.Dot(cameraLookAt, foregroundCamObj.transform.forward);
+                foregroundCamObj.GetComponent<Camera>().farClipPlane = Mathf.Max(foregroundCamObj.GetComponent<Camera>().nearClipPlane + 0.001f, distance);
+            }
+
+            CalibrationMRCCam();
         }
 
-        
-
-        public void UPxr_ReadXML(out CameraData cameradata)
+        public void CreateMRCCam()
         {
-            CameraData cameraDataNew = new CameraData();
-            string path = Application.persistentDataPath + "/mrc.xml";
-            cameraAttribute = PXR_Plugin.PlatformSetting.UPxr_MRCCalibration(path);
-            Debug.Log("PXR MRC cameraDataLength: " + cameraAttribute.Length);
-            for (int i = 0; i < cameraAttribute.Length; i++)
+            if (backgroundCamObj == null)
             {
-                Debug.Log("PXR MRC cameraData: " + i.ToString() + ": " + cameraAttribute[i].ToString());
+                backgroundCamObj = new GameObject("myBackgroundCamera");
+                backgroundCamObj.transform.parent = Camera.main.transform.parent;
+                backgroundCamObj.AddComponent<Camera>();
+                PLog.i(TAG_MRC, "create background camera object.");
             }
-            cameraDataNew.imageWidth = cameraAttribute[0];
-            cameraDataNew.imageHeight = cameraAttribute[1];
-            yFov = cameraAttribute[2];
-            cameraDataNew.translation = new float[3];
-            cameraDataNew.rotation = new float[4];
-            for (int i = 0; i < 3; i++)
+            InitBackgroungCam(backgroundCamObj.GetComponent<Camera>());
+            backgroundCamObj.SetActive(true);
+
+            if (foregroundCamObj == null)
             {
-                cameraDataNew.translation[i] = cameraAttribute[3 + i];
+                foregroundCamObj = new GameObject("myForegroundCamera");
+                foregroundCamObj.transform.parent = Camera.main.transform.parent;
+                foregroundCamObj.AddComponent<Camera>();
+                PLog.i(TAG_MRC, "create foreground camera object.");
             }
-            for (int i = 0; i < 4; i++)
-            {
-                cameraDataNew.rotation[i] = cameraAttribute[6 + i];
-            }
-            cameradata = cameraDataNew;
+            InitForegroundCam(foregroundCamObj.GetComponent<Camera>());
+            foregroundCamObj.SetActive(true);
+
+            mrcCamObjActived = true;
+
+            PLog.i(TAG_MRC, "Camera Obj Actived. mrcCamObjActived : true.");
         }
 
-        public void UPxr_CreateCamera()
+        private void InitBackgroungCam(Camera camera)
         {
-            if (backCameraObj == null)
+            camera.clearFlags = CameraClearFlags.Skybox;
+            camera.stereoTargetEye = StereoTargetEyeMask.None;
+            camera.transform.localScale = Vector3.one;
+            camera.transform.localPosition = Vector3.zero;
+            camera.transform.localEulerAngles = Vector3.zero;
+            camera.depth = 9999;
+            camera.gameObject.layer = 0;
+            camera.orthographic = false;
+            camera.fieldOfView = xmlCamData.yFov;
+            camera.aspect = xmlCamData.imageW / xmlCamData.imageH;
+            camera.allowMSAA = true;
+            camera.cullingMask = backLayerMask;
+            if (mrcBackgroundRT == null)
             {
-                backCameraObj = new GameObject("myBackCamera");
-                backCameraObj.tag = "mrc";
-                backCameraObj.transform.parent = Camera.main.transform.parent;
-                Camera camera = backCameraObj.AddComponent<Camera>();
-                camera.stereoTargetEye = StereoTargetEyeMask.None;
-                camera.transform.localScale = Vector3.one;
-                camera.depth = 9999;
-                camera.gameObject.layer = 0;
-                camera.clearFlags = CameraClearFlags.Skybox;
-                camera.orthographic = false;
-                camera.fieldOfView = yFov;
-                camera.aspect = imageW / imageH;
-                camera.transform.localPosition = Vector3.zero;
-                camera.transform.localEulerAngles = Vector3.zero;
-                camera.allowMSAA = true;
-                camera.cullingMask = backLayerMask;
-                if (mrcRenderTexture == null)
-                {
-                    mrcRenderTexture = new RenderTexture((int)imageW, (int)imageH, 24, RenderTextureFormat.ARGB32);
-                }
-                mrcRenderTexture.name = "mrcRenderTexture";
-                camera.targetTexture = mrcRenderTexture;
+                mrcBackgroundRT = new RenderTexture((int)xmlCamData.imageW, (int)xmlCamData.imageH, 24, RenderTextureFormat.ARGB32);
             }
-            else
-            {
-                backCameraObj.GetComponent<Camera>().stereoTargetEye = StereoTargetEyeMask.None;
-                backCameraObj.GetComponent<Camera>().transform.localPosition = Vector3.zero;
-                backCameraObj.GetComponent<Camera>().transform.localEulerAngles = Vector3.zero;
-                backCameraObj.GetComponent<Camera>().transform.localScale = Vector3.one;
-                backCameraObj.GetComponent<Camera>().depth = 9999;
-                backCameraObj.GetComponent<Camera>().gameObject.layer = 0;
-                backCameraObj.GetComponent<Camera>().clearFlags = CameraClearFlags.Skybox;
-                backCameraObj.GetComponent<Camera>().orthographic = false;
-                backCameraObj.GetComponent<Camera>().fieldOfView = yFov;
-                backCameraObj.GetComponent<Camera>().aspect = imageW / imageH;
-                backCameraObj.GetComponent<Camera>().allowMSAA = true;
-                backCameraObj.GetComponent<Camera>().cullingMask = backLayerMask;
-                if (mrcRenderTexture == null)
-                {
-                    mrcRenderTexture = new RenderTexture((int)imageW, (int)imageH, 24, RenderTextureFormat.ARGB32);
-                }
-                backCameraObj.GetComponent<Camera>().targetTexture = mrcRenderTexture;
-                backCameraObj.SetActive(true);
-            }
-            if (foregroundCameraObj == null)
-            {
-                foregroundCameraObj = new GameObject("myForegroundCamera");
-                foregroundCameraObj.transform.parent = Camera.main.transform.parent;
-                Camera camera = foregroundCameraObj.AddComponent<Camera>();
-                camera.clearFlags = CameraClearFlags.SolidColor;
-                camera.backgroundColor = foregroundColor;
-                camera.stereoTargetEye = StereoTargetEyeMask.None;
-                camera.transform.localScale = Vector3.one;
-                camera.depth = 10000;
-                camera.gameObject.layer = 0;
-                camera.orthographic = false;
-                camera.fieldOfView = yFov;
-                camera.aspect = imageW / imageH;
-                camera.transform.localPosition = Vector3.zero;
-                camera.transform.localEulerAngles = Vector3.zero;
-                camera.allowMSAA = true;
-                camera.cullingMask = foregroundLayerMask;
-                if (foregroundMrcRenderTexture == null)
-                {
-                    foregroundMrcRenderTexture = new RenderTexture((int)imageW, (int)imageH, 24, RenderTextureFormat.ARGB32);
-                }
-                foregroundMrcRenderTexture.name = "foregroundMrcRenderTexture";
-                camera.targetTexture = foregroundMrcRenderTexture;
-            }
-            else
-            {
-                foregroundCameraObj.GetComponent<Camera>().clearFlags = CameraClearFlags.SolidColor;
-                foregroundCameraObj.GetComponent<Camera>().backgroundColor = foregroundColor;
-                foregroundCameraObj.GetComponent<Camera>().stereoTargetEye = StereoTargetEyeMask.None;
-                foregroundCameraObj.GetComponent<Camera>().transform.localPosition = Vector3.zero;
-                foregroundCameraObj.GetComponent<Camera>().transform.localEulerAngles = Vector3.zero;
-                foregroundCameraObj.GetComponent<Camera>().transform.localScale = Vector3.one;
-                foregroundCameraObj.GetComponent<Camera>().depth = 10000;
-                foregroundCameraObj.GetComponent<Camera>().gameObject.layer = 0;
-                foregroundCameraObj.GetComponent<Camera>().orthographic = false;
-                foregroundCameraObj.GetComponent<Camera>().fieldOfView = yFov;
-                foregroundCameraObj.GetComponent<Camera>().aspect = imageW / imageH;
-                foregroundCameraObj.GetComponent<Camera>().allowMSAA = true;
-                foregroundCameraObj.GetComponent<Camera>().cullingMask = foregroundLayerMask;
-                if (foregroundMrcRenderTexture == null)
-                {
-                    foregroundMrcRenderTexture = new RenderTexture((int)imageW, (int)imageH, 24, RenderTextureFormat.ARGB32);
-                }
-                foregroundCameraObj.GetComponent<Camera>().targetTexture = foregroundMrcRenderTexture;
-                foregroundCameraObj.SetActive(true);
-            }
-            mrcPlay = true;
+            mrcBackgroundRT.name = "backgroundMrcRenderTexture";
+            camera.targetTexture = mrcBackgroundRT;
+            PLog.i(TAG_MRC, "init background camera.");
+        }
 
-            Debug.Log("PXR MRC Camera created. mrcPlay is true.");
+        void InitForegroundCam(Camera camera)
+        {
+            camera.backgroundColor = foregroundColor;
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.stereoTargetEye = StereoTargetEyeMask.None;
+            camera.transform.localScale = Vector3.one;
+            camera.transform.localPosition = Vector3.zero;
+            camera.transform.localEulerAngles = Vector3.zero;
+            camera.depth = 10000;
+            camera.gameObject.layer = 0;
+            camera.orthographic = false;
+            camera.fieldOfView = xmlCamData.yFov;
+            camera.aspect = xmlCamData.imageW / xmlCamData.imageH;
+            camera.allowMSAA = true;
+            camera.cullingMask = foregroundLayerMask;
+            if (mrcForegroundRT == null)
+            {
+                mrcForegroundRT = new RenderTexture((int)xmlCamData.imageW, (int)xmlCamData.imageH, 24, RenderTextureFormat.ARGB32);
+            }
+            mrcForegroundRT.name = "foregroundMrcRenderTexture";
+            camera.targetTexture = mrcForegroundRT;
+            PLog.i(TAG_MRC, "init foreground camera.");
+        }
+
+        public void CalibrationMRCCam()
+        {
+            if (!PXR_Plugin.System.UPxr_GetMRCEnable() || null == backgroundCamObj || null == foregroundCamObj) return;
+
+            PxrPosef pose = new PxrPosef();
+            pose.orientation.x = 0;
+            pose.orientation.y = 0;
+            pose.orientation.z = 0;
+            pose.orientation.w = 0;
+            pose.position.x = 0;
+            pose.position.y = 0;
+            pose.position.z = 0;
+            PXR_Plugin.System.UPxr_GetMrcPose(ref pose);
+            backgroundCamObj.transform.localPosition = new Vector3(pose.position.x, pose.position.y + height, (-pose.position.z) * 1f);
+            foregroundCamObj.transform.localPosition = new Vector3(pose.position.x, pose.position.y + height, (-pose.position.z) * 1f);
+            Vector3 rototion = new Quaternion(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w).eulerAngles;
+            backgroundCamObj.transform.localEulerAngles = new Vector3(-rototion.x, -rototion.y, -rototion.z);
+            foregroundCamObj.transform.localEulerAngles = new Vector3(-rototion.x, -rototion.y, -rototion.z);
         }
 
         public Vector3 UPxr_ToVector3(float[] translation)
@@ -745,137 +701,7 @@ namespace Unity.XR.PXR
         public void Pxr_GetHeight()
         {
             height = Camera.main.transform.localPosition.y - PXR_Plugin.System.UPxr_GetMrcY();
-            Debug.Log("PXR MRC Pxr_GetMrcY+:" + PXR_Plugin.System.UPxr_GetMrcY().ToString());
-        }
-
-        private void MRCUpdata() {
-            if (PXR_Plugin.System.UPxr_GetMRCEnable())
-            {
-                if (backCameraObj == null)
-                {
-                    if (Camera.main.transform != null)
-                    {
-                        UPxr_CreateCamera();
-                        UPxr_Calibration();
-                    }
-                }                     
-                else
-                {
-                    if (!mrcPlay)
-                    {
-                        if (Camera.main.transform != null)
-                        {
-                            UPxr_CreateCamera();
-                            UPxr_Calibration();
-                        }
-                    }
-                }
-                if (foregroundCameraObj != null)
-                {
-                    Vector3 cameraLookAt = Camera.main.transform.position - foregroundCameraObj.transform.position;
-                    float distance = Vector3.Dot(cameraLookAt, foregroundCameraObj.transform.forward);
-                    foregroundCameraObj.GetComponent<Camera>().farClipPlane = Mathf.Max(foregroundCameraObj.GetComponent<Camera>().nearClipPlane + 0.001f, distance);
-                }
-                if (backCameraObj != null && foregroundCameraObj != null)
-                {
-                    UPxr_Calibration();
-                }
-            }
-            else
-            {
-                if (mrcPlay == true)
-                {
-                    mrcPlay = false;
-                    backCameraObj.SetActive(false);
-                    foregroundCameraObj.SetActive(false);
-                }
-            }
-        }
-
-        public void UPxr_GetLayerImage()
-        {
-            if (layerImageEnable == true && createMRCOverlaySucceed == false)
-            {
-                if (layerTexturesInfo == null)
-                {
-                    layerTexturesInfo = new LayerTexture[2];
-                }
-                if (PXR_Plugin.Render.UPxr_GetLayerImageCount(99999, EyeType.EyeLeft, ref imageCounts) == 0 && imageCounts > 0)
-                {
-                    if (layerTexturesInfo[0].swapChain == null)
-                    {
-                        layerTexturesInfo[0].swapChain = new Texture[imageCounts];
-                    }
-                    for (int j = 0; j < imageCounts; j++)
-                    {
-                        IntPtr ptr = IntPtr.Zero;
-                        PXR_Plugin.Render.UPxr_GetLayerImagePtr(99999, EyeType.EyeLeft, j, ref ptr);
-                        if (ptr == IntPtr.Zero)
-                        {
-                            continue;
-                        }
-                        Texture sc = Texture2D.CreateExternalTexture((int)imageW, (int)imageH, TextureFormat.RGBA32, false, true, ptr);
-
-                        if (sc == null)
-                        {
-                            continue;
-                        }
-
-                        layerTexturesInfo[0].swapChain[j] = sc;
-                    }
-
-                }
-                if (PXR_Plugin.Render.UPxr_GetLayerImageCount(99999, EyeType.EyeRight, ref imageCounts) == 0 && imageCounts > 0)
-                {
-                    if (layerTexturesInfo[1].swapChain == null)
-                    {
-                        layerTexturesInfo[1].swapChain = new Texture[imageCounts];
-                    }
-
-                    for (int j = 0; j < imageCounts; j++)
-                    {
-                        IntPtr ptr = IntPtr.Zero;
-                        PXR_Plugin.Render.UPxr_GetLayerImagePtr(99999, EyeType.EyeRight, j, ref ptr);
-                        if (ptr == IntPtr.Zero)
-                        {
-                            continue;
-                        }
-
-                        Texture sc = Texture2D.CreateExternalTexture((int)imageW, (int)imageH, TextureFormat.RGBA32, false, true, ptr);
-
-                        if (sc == null)
-                        {
-                            continue;
-                        }
-
-                        layerTexturesInfo[1].swapChain[j] = sc;
-                    }
-
-                    createMRCOverlaySucceed = true;
-                    Debug.Log("PXR MRC Pxr_GetMrcLayerImage createMRCOverlaySucceed : true.");
-                }
-            }
-        }
-
-        public void UPxr_Calibration()
-        {
-            if (PXR_Plugin.System.UPxr_GetMRCEnable())
-            {
-                PxrPosef pose = new PxrPosef();
-                pose.orientation.x = 0;
-                pose.orientation.y = 0;
-                pose.orientation.z = 0;
-                pose.orientation.w = 0;
-                pose.position.x = 0;
-                pose.position.y = 0;
-                pose.position.z = 0;
-                PXR_Plugin.System.UPxr_GetMrcPose(ref pose);
-                backCameraObj.transform.localPosition = new Vector3(pose.position.x, pose.position.y + height, (-pose.position.z) * 1f);
-                foregroundCameraObj.transform.localPosition = new Vector3(pose.position.x, pose.position.y + height, (-pose.position.z) * 1f);
-                Vector3 rototion = new Quaternion(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w).eulerAngles;
-                backCameraObj.transform.localEulerAngles = new Vector3(-rototion.x, -rototion.y, -rototion.z);
-                foregroundCameraObj.transform.localEulerAngles = new Vector3(-rototion.x, -rototion.y, -rototion.z);
-            }
+            PLog.i(TAG_MRC, "Pxr_GetMrcY+:" + PXR_Plugin.System.UPxr_GetMrcY().ToString());
         }
 
         #endregion
@@ -883,11 +709,11 @@ namespace Unity.XR.PXR
     public struct CameraData
     {
         public string id;
-        public string cameraName;
-        public float imageWidth;
-        public float imageHeight;
-        public float[] translation;
-        public float[] rotation;
+        public string name;
+        public float imageW;
+        public float imageH;
+        public float yFov;
+        public PxrVector3f position;
+        public PxrVector4f orientation;
     }
 }
-

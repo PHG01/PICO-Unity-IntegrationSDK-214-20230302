@@ -113,8 +113,8 @@ namespace Unity.XR.PXR.Editor
             //body tracking
             var bodyContent = new GUIContent();
             bodyContent.text = "Body Tracking";
-            projectConfig.bodyTraching = EditorGUILayout.Toggle(bodyContent, projectConfig.bodyTraching);
-            manager.bodyTracking = projectConfig.bodyTraching;
+            projectConfig.bodyTracking = EditorGUILayout.Toggle(bodyContent, projectConfig.bodyTracking);
+            manager.bodyTracking = projectConfig.bodyTracking;
 
             // content protect
             projectConfig.useContentProtect = EditorGUILayout.Toggle("Use Content Protect", projectConfig.useContentProtect);
@@ -143,6 +143,12 @@ namespace Unity.XR.PXR.Editor
             //Late Latching
             projectConfig.latelatching = EditorGUILayout.Toggle("Use Late Latching", projectConfig.latelatching);
             manager.lateLatching = projectConfig.latelatching;
+            if (manager.lateLatching)
+            {
+                projectConfig.latelatchingDebug = EditorGUILayout.Toggle("  Late Latching Debug", projectConfig.latelatchingDebug);
+                manager.latelatchingDebug = projectConfig.latelatchingDebug;
+            }
+
             if (Camera.main != null)
             {
                 var head = Camera.main.transform;

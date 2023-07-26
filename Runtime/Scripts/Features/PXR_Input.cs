@@ -25,7 +25,7 @@ namespace Unity.XR.PXR
             Neo2,
             Neo3,
             PICO_4,
-            Merline,
+            G3,
             NewController = 10
         }
 
@@ -897,7 +897,7 @@ namespace Unity.XR.PXR
         /// * `0`: success
         /// * `1`: failure
         /// </returns>
-        public static int StartHappticStream(int source_id)
+        public static int StartHapticStream(int source_id)
         {
             return PXR_Plugin.Controller.UPxr_StartPHFHaptic(source_id);
         }
@@ -910,7 +910,7 @@ namespace Unity.XR.PXR
         /// * `0`: success
         /// * `1`: failure
         /// </returns>
-        public static int StopHappticStream(int source_id)
+        public static int StopHapticStream(int source_id)
         {
             return PXR_Plugin.Controller.UPxr_StopPHFHaptic(source_id);
         }
@@ -923,7 +923,7 @@ namespace Unity.XR.PXR
         /// * `0`: success
         /// * `1`: failure
         /// </returns>
-        public static int RemoveHappticStream(int source_id)
+        public static int RemoveHapticStream(int source_id)
         {
             return PXR_Plugin.Controller.UPxr_RemovePHFHaptic(source_id);
         }
@@ -932,7 +932,7 @@ namespace Unity.XR.PXR
         /// Parses the haptic data in a specified PICO haptic file (PHF).
         /// </summary>
         /// <param name="phfText">The PICO haptic file (.json) to parse.</param>
-        public static PxrPhfFile AnalysisHappticStreamPHF(TextAsset phfText)
+        public static PxrPhfFile AnalysisHapticStreamPHF(TextAsset phfText)
         {
             String str = phfText.text;
             return JsonMapper.ToObject<PxrPhfFile>(str);

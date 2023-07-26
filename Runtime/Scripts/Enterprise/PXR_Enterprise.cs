@@ -14,12 +14,16 @@ using System;
 
 namespace Unity.XR.PXR
 {
+    /**
+     * Enterprise APIs are only supported by enterprise devices, including PICO Neo2, Neo2 Eye, Neo3 Pro、Neo3 Pro Eye, G2 4K/4K E/4K Plus (system version 4.0.3 or later), and PICO 4 Enterprise.
+     * Do not use them on consumer devices.
+     */
     public class PXR_Enterprise
     {
         /// <summary>
-        /// Initializes the system service for a specified game object. Must be called before calling other system related functions.
+        /// Initializes the enterprise service for a specified object. Must be called before calling other enterprise APIs.
         /// </summary>
-        /// <param name="objectName">The name of the game object to initialize the system service for.</param>
+        /// <param name="objectName">The name of the object to initialize the enterprise service for.</param>
         public static void InitEnterpriseService(string objectName)
         {
             PXR_EnterprisePlugin.UPxr_InitEnterpriseService();
@@ -28,7 +32,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Binds the system service. Must be called before calling other system related functions.
+        /// Binds the enterprise service. Must be called before calling other system related functions.
         /// </summary>
         public static void BindEnterpriseService()
         {
@@ -36,7 +40,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Unbinds the system service.
+        /// Unbinds the enterprise service.
         /// </summary>
         public static void UnBindEnterpriseService()
         {
@@ -44,9 +48,9 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Turns on the battery service.
+        /// Turns on the power service for a specified object.
         /// </summary>
-        /// <param name="objName">The name of the game object to turn on the battery service for.</param>
+        /// <param name="objName">The name of the object to turn on the power service for.</param>
         /// <returns>Whether the power service has been turned on:
         /// * `true`: success
         /// * `false`: failure
@@ -57,7 +61,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Turns off the battery service.
+        /// Turns off the power service.
         /// </summary>
         /// <returns>Whether the power service has been turned off:
         /// * `true`: success
@@ -71,7 +75,7 @@ namespace Unity.XR.PXR
         /// <summary>
         /// Sets the brightness for the current HMD.
         /// </summary>
-        /// <param name="brightness">Target brightness. The valid value ranges from `0` to `255`.</param>
+        /// <param name="brightness">Target brightness. Value range: [0,255].</param>
         /// <returns>Whether the brightness has been set successfully:
         /// * `true`: success
         /// * `false`: failure
@@ -84,7 +88,7 @@ namespace Unity.XR.PXR
         /// <summary>
         /// Gets the brightness of the current HMD.
         /// </summary>
-        /// <returns>An int value that indicates the brightness. The value ranges from `0` to `255`.</returns>
+        /// <returns>An int value that indicates the brightness. Value range: [0,255].</returns>
         public static int GetCommonBrightness()
         {
             return PXR_EnterprisePlugin.UPxr_GetCurrentBrightness();
@@ -103,10 +107,10 @@ namespace Unity.XR.PXR
         /// Sets a brightness level for the current screen.
         /// </summary>
         /// <param name="brightness">Brightness mode:
-        /// * `0`: system default brightness setting
-        /// * `1`: custom brightness setting
+        /// * `0`: system default brightness setting.
+        /// * `1`: custom brightness setting, you can then set param `level`.
         /// </param>
-        /// <param name="level">Brightness level. The valid value ranges from `1` to `255`. If `brightness` is set to `1`, set a desired brightness level; if `brightness` is set to `0`, the system default brightness setting is adopted.</param>
+        /// <param name="level">Brightness level. Value range: [1,255].</param>
         public static void SetScreenBrightnessLevel(int brightness, int level)
         {
             PXR_EnterprisePlugin.UPxr_SetScreenBrightnessLevel(brightness, level);
@@ -125,9 +129,9 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Turns on the volume service for a specified game object.
+        /// Turns on the volume service for a specified object.
         /// </summary>
-        /// <param name="objName">The name of the game object to turn on the volume service for.</param>
+        /// <param name="objName">The name of the object to turn on the volume service for.</param>
         /// <returns>Whether the volume service has been turned on:
         /// * `true`: success
         /// * `false`: failure
@@ -150,7 +154,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Gets the maximum volume. Call InitAudioDevice to initialize the audio device before calling this function.
+        /// Gets the maximum volume. Call `InitAudioDevice` to initialize the audio device before using this API.
         /// </summary>
         /// <returns>An int value that indicates the maximum volume.</returns>
         public static int GetMaxVolumeNumber()
@@ -159,16 +163,16 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Gets the current volume. Call InitAudioDevice to initialize the audio device before calling this function.
+        /// Gets the current volume. Call `InitAudioDevice` to initialize the audio device before using this API.
         /// </summary>
-        /// <returns>An int value that indicates the current volume. The value ranges from `0` to `15`.</returns>
+        /// <returns>An int value that indicates the current volume. Value range: [0,15].</returns>
         public static int GetCurrentVolumeNumber()
         {
             return PXR_EnterprisePlugin.UPxr_GetCurrentVolumeNumber();
         }
 
         /// <summary>
-        /// Increases the volume. Call InitAudioDevice to initialize the audio device before calling this function.
+        /// Increases the volume. Call `InitAudioDevice` to initialize the audio device before using this API.
         /// </summary>
         /// <returns>Whether the volume has been increased:
         /// * `true`: success
@@ -180,7 +184,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Decreases the volume. Call InitAudioDevice to initialize the audio device before calling this function.
+        /// Decreases the volume. Call `InitAudioDevice` to initialize the audio device before using this API.
         /// </summary>
         /// <returns>Whether the volume has been decreased:
         /// * `true`: success
@@ -192,9 +196,9 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Sets the volume. Call InitAudioDevice to initialize the audio device before calling this function.
+        /// Sets a volume. Call `InitAudioDevice` to initialize the audio device before using this API.
         /// </summary>
-        /// <param name="volume">The target volume. The valid value ranges from `0` to `15`.</param>
+        /// <param name="volume">The target volume. Value range: [0,15].</param>
         /// <returns>Whether the target volume has been set:
         /// * `true`: success
         /// * `false`: failure
@@ -207,9 +211,9 @@ namespace Unity.XR.PXR
         /// <summary>
         /// Gets the specified type of device information.
         /// </summary>
-        /// <param name="type">The target informaiton type. Enumerations:
+        /// <param name="type">The target information type. Enumerations:
         /// * `ELECTRIC_QUANTITY`: battery
-        /// * `PUI_VERSION`: PUI version
+        /// * `PUI_VERSION`: system version
         /// * `EQUIPMENT_MODEL`: device model
         /// * `EQUIPMENT_SN`: device SN code
         /// * `CUSTOMER_SN`: customer SN code
@@ -230,7 +234,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Controls the device to shut down or reboot.
+        /// Shuts down or reboots the device.
         /// @note This is a protected API. You need to add `<meta-data android:name="pico_advance_interface" android:value="0"/>`
         /// to the app's AndroidManifest.xml file for calling this API, after which the app is unable to be published on the PICO Store.
         /// </summary>
@@ -240,7 +244,7 @@ namespace Unity.XR.PXR
         /// </param>
         /// <param name="callback">Callback:
         /// * `1`: failed to shut down or reboot the device
-        /// * `2`: no permission for device control
+        /// * `2`: no permission to perform this operation
         /// </param>
         public static void ControlSetDeviceAction(DeviceControlEnum deviceControl, Action<int> callback)
         {
@@ -260,7 +264,7 @@ namespace Unity.XR.PXR
         /// <param name="callback">Callback:
         /// * `0`: success
         /// * `1`: failure
-        /// * `2`: no permission for this operation
+        /// * `2`: no permission to perform this operation
         /// </param>
         public static void ControlAPPManager(PackageControlEnum packageControl, string path, Action<int> callback)
         {
@@ -294,26 +298,38 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Sets the Home key event.
+        /// Sets the Home button event.
         /// </summary>
         /// <param name="eventEnum">Target event. Enumerations:
-        /// * `SINGLE_CLICK`
-        /// * `DOUBLE_CLICK`
+        /// * `SINGLE_CLICK`: single-click
+        /// * `DOUBLE_CLICK`: double-click
+        /// * `LONG_PRESS`: long press
+        /// * `SINGLE_CLICK_RIGHT_CTL`: single-click on the right controller's Home button
+        /// * `DOUBLE_CLICK_RIGHT_CTL`: double-click on the right controller's Home button
+        /// * `LONG_PRESS_RIGHT_CTL`: long press on the right controller's Home button
+        /// * `SINGLE_CLICK_LEFT_CTL`: single-click on the left controller's Home button
+        /// * `DOUBLE_CLICK_LEFT_CTL`: double-click on the left controller's Home button
+        /// * `LONG_PRESS_LEFT_CTL`: long press on the left controller's Home button
+        /// * `SINGLE_CLICK_HMD`: single-click on the HMD's Home button
+        /// * `DOUBLE_CLICK_HMD`: double-click on the HMD's Home button
+        /// * `LONG_PRESS_HMD`: long press on the HMD's Home button
         /// </param>
         /// <param name="function">The function of the event. Enumerations:
         /// * `VALUE_HOME_GO_TO_SETTING`: go to Settings
-        /// * `VALUE_HOME_BACK`: back
-        /// * `VALUE_HOME_RECENTER`: recenter
+        /// * `VALUE_HOME_BACK`: back (only supported by PICO G2 4K)
+        /// * `VALUE_HOME_RECENTER`: recenter the screen
         /// * `VALUE_HOME_OPEN_APP`: open a specified app
-        /// * `VALUE_HOME_DISABLE`: disable Home key event
+        /// * `VALUE_HOME_DISABLE`: disable the Home button
         /// * `VALUE_HOME_GO_TO_HOME`: open the launcher
-        /// * `VALUE_HOME_SEND_BROADCAST`: send Home-key-click broadcast
+        /// * `VALUE_HOME_SEND_BROADCAST`: send Home-button-click broadcast
         /// * `VALUE_HOME_CLEAN_MEMORY`: clear background apps
         /// * `VALUE_HOME_QUICK_SETTING`: enable quick settings
+        /// * `VALUE_HOME_SCREEN_CAP`: enable screen capture
+        /// * `VALUE_HOME_SCREEN_RECORD`: enable screen recording
         /// </param>
         /// <param name="callback">Callback:
-        /// * `true`: set
-        /// * `false`: failed to set
+        /// * `true`: success
+        /// * `false`: failure
         /// </param>
         public static void PropertySetHomeKey(HomeEventEnum eventEnum, HomeFunctionEnum function, Action<bool> callback)
         {
@@ -321,24 +337,33 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Sets extended settings for the Home key.
+        /// Sets extended settings for the Home button.
         /// </summary>
         /// <param name="eventEnum">Target event. Enumerations:
-        /// * `SINGLE_CLICK`
-        /// * `DOUBLE_CLICK`
+        /// * `SINGLE_CLICK_RIGHT_CTL`: single-click on the right controller's Home button
+        /// * `DOUBLE_CLICK_RIGHT_CTL`: double-click on the right controller's Home button
+        /// * `LONG_PRESS_RIGHT_CTL`: long press on the right controller's Home button
+        /// * `SINGLE_CLICK_LEFT_CTL`: single-click on the left controller's Home button
+        /// * `DOUBLE_CLICK_LEFT_CTL`: double-click on the left controller's Home button
+        /// * `LONG_PRESS_LEFT_CTL`: long press on the left controller's Home button
+        /// * `SINGLE_CLICK_HMD`: single-click on the HMD's Home button
+        /// * `DOUBLE_CLICK_HMD`: double-click on the HMD's Home button
+        /// * `LONG_PRESS_HMD`: long press on the HMD's Home button
         /// </param>
         /// <param name="function">The function of the event. Enumerations:
         /// * `VALUE_HOME_GO_TO_SETTING`: go to Settings
-        /// * `VALUE_HOME_BACK`: back
-        /// * `VALUE_HOME_RECENTER`: recenter
+        /// * `VALUE_HOME_BACK`: back (only supported by PICO G2 4K)
+        /// * `VALUE_HOME_RECENTER`: recenter the screen
         /// * `VALUE_HOME_OPEN_APP`: open a specified app
-        /// * `VALUE_HOME_DISABLE`: disable Home key event
+        /// * `VALUE_HOME_DISABLE`: disable the Home button
         /// * `VALUE_HOME_GO_TO_HOME`: open the launcher
         /// * `VALUE_HOME_SEND_BROADCAST`: send Home-key-click broadcast
         /// * `VALUE_HOME_CLEAN_MEMORY`: clear background apps
         /// * `VALUE_HOME_QUICK_SETTING`: enable quick settings
+        /// * `VALUE_HOME_SCREEN_CAP`: enable screen capture
+        /// * `VALUE_HOME_SCREEN_RECORD`: enable screen recording
         /// </param>
-        /// <param name="timesetup">The interval of key pressing is set only if there is the double click event or long pressing event. When shortly pressing the Home key, pass `0`.</param>
+        /// <param name="timesetup">The interval of key pressing is set only if there is the double click event or long pressing event. When shortly pressing the Home button, pass `0`.</param>
         /// <param name="pkg">Pass `null`.</param>
         /// <param name="className">Pass `null`.</param>
         /// <param name="callback">Callback:
@@ -351,20 +376,19 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Sets the Power key event.
+        /// Sets the Power button's event.
         /// </summary>
         /// <param name="isSingleTap">Whether it is a single click event:
         /// * `true`: single-click event
         /// * `false`: long-press event
         /// </param>
-        /// <param name="enable">Key enabling status:
-        /// * `true`: enabled
-        /// * `false`: not enabled
+        /// <param name="enable">Enable or disable the Power button:
+        /// * `true`: enable
+        /// * `false`: disable
         /// </param>
         /// <param name="callback">Callback:
         /// * `0`: set
         /// * `1`: failed to set
-        /// * `11`: press the Power key for no more than 5s
         /// </param>
         public static void PropertyDisablePowerKey(bool isSingleTap, bool enable, Action<int> callback)
         {
@@ -376,8 +400,8 @@ namespace Unity.XR.PXR
         /// </summary>
         /// <param name="timeEnum">Screen off timeout. Enumerations:
         /// * `Never`: never off
-        /// * `THREE`: 3s
-        /// * `TEN`: 10s
+        /// * `THREE`: 3s (only supported by PICO G2 4K)
+        /// * `TEN`: 10s (only supported by PICO G2 4K)
         /// * `THIRTY`: 30s
         /// * `SIXTY`: 60s
         /// * `THREE_HUNDRED`: 5 mins
@@ -386,7 +410,7 @@ namespace Unity.XR.PXR
         /// <param name="callback">Callback:
         /// * `0`: set
         /// * `1`: failed to set
-        /// * `10`: the screen off timeout should not be greater than the system sleep timeout
+        /// * `10`: the screen off timeout should not be longer than the system sleep timeout
         /// </param>
         public static void PropertySetScreenOffDelay(ScreenOffDelayTimeEnum timeEnum, Action<int> callback)
         {
@@ -398,9 +422,9 @@ namespace Unity.XR.PXR
         /// </summary>
         /// <param name="timeEnum">System sleep timeout. Enumerations:
         /// * `Never`: never sleep
-        /// * `FIFTEEN`: 15s
-        /// * `THIRTY`: 30s
-        /// * `SIXTY`: 60s
+        /// * `FIFTEEN`: 15s (only supported by PICO G2 4K)
+        /// * `THIRTY`: 30s (only supported by PICO G2 4K)
+        /// * `SIXTY`: 60s (only supported by PICO G2 4K)
         /// * `THREE_HUNDRED`: 5 mins
         /// * `SIX_HUNDRED`: 10 mins
         /// * `ONE_THOUSAND_AND_EIGHT_HUNDRED`: 30 mins
@@ -417,34 +441,46 @@ namespace Unity.XR.PXR
         /// * `SFS_USB`: USB debugging
         /// * `SFS_AUTOSLEEP`: auto sleep
         /// * `SFS_SCREENON_CHARGING`: screen-on charging
-        /// * `SFS_OTG_CHARGING`: OTG charging
-        /// * `SFS_RETURN_MENU_IN_2DMODE`: display the Return icon on the 2D screen
+        /// * `SFS_OTG_CHARGING`: OTG charging (only supported by G2 and Neo2 devices)
+        /// * `SFS_RETURN_MENU_IN_2DMODE`: display the Return icon on the 2D screen (only supported by G2 devices)
         /// * `SFS_COMBINATION_KEY`: combination key
-        /// * `SFS_CALIBRATION_WITH_POWER_ON`: calibration with power on
+        /// * `SFS_CALIBRATION_WITH_POWER_ON`: calibration with power on (only supported by G2 devices)
         /// * `SFS_SYSTEM_UPDATE`: system update
-        /// * `SFS_CAST_SERVICE`: phone casting service
+        /// * `SFS_CAST_SERVICE`: phone casting service (only supported by G2 and Neo3 Pro/Pro Eye devices)
         /// * `SFS_EYE_PROTECTION`: eye-protection mode
-        /// * `SFS_SECURITY_ZONE_PERMANENTLY`: permanently disable the 6DoF play area 
-        /// * `SFS_Auto_Calibration`: auto recenter/recalibrate
+        /// * `SFS_SECURITY_ZONE_PERMANENTLY`: permanently disable the 6DoF play area (not supported by G2 devices)
+        /// * `SFS_GLOBAL_CALIBRATION`: global calibration (only supported by G2 devices)
+        /// * `SFS_Auto_Calibration`: auto calibration (only supported by G2 devices)
         /// * `SFS_USB_BOOT`: USB plug-in boot
-        /// * `SFS_VOLUME_UI`: global volume UI
+        /// * `SFS_VOLUME_UI`: global volume UI (need to restart the device to make the setting take effect)
         /// * `SFS_CONTROLLER_UI`: global controller connected UI
         /// * `SFS_NAVGATION_SWITCH`: navigation bar
         /// * `SFS_SHORTCUT_SHOW_RECORD_UI`: screen recording button UI
-        /// * `SFS_SHORTCUT_SHOW_FIT_UI`: PICO fit UI
+        /// * `SFS_SHORTCUT_SHOW_FIT_UI`: PICO fit UI (only supported by Neo devices for Chinese Mainland)
         /// * `SFS_SHORTCUT_SHOW_CAST_UI`: screencast button UI
         /// * `SFS_SHORTCUT_SHOW_CAPTURE_UI`: screenshot button UI
-        /// * `SFS_USB_FORCE_HOST`: set the Neo3 device as the host device
-        /// * `SFS_SET_DEFAULT_SAFETY_ZONE`: set a default play area for a Neo3 device
-        /// * `SFS_ALLOW_RESET_BOUNDARY`: allow to reset customized boundary
-        /// * `SFS_BOUNDARY_CONFIRMATION_SCREEN`: whether to display the boundary confirmation screen
-        /// * `SFS_LONG_PRESS_HOME_TO_RECENTER`: long press the Home key to recenter
-        /// * `SFS_POWER_CTRL_WIFI_ENABLE`: Neo3 device stays connected to the network when the device sleeps/turns off
-        /// * `SFS_WIFI_DISABLE`: disable Wi-Fi for Neo3 device
-        /// * `SFS_SIX_DOF_SWITCH`: 6DoF position tracking
-        /// * `SFS_INVERSE_DISPERSION`: anti-dispersion (need to restart the device to make the setting take effect)
-        /// * `PBS_SystemFunctionSwitchEnum.SFS_LOGCAT`: system log switch (/data/logs)
-        /// * `PBS_SystemFunctionSwitchEnum.SFS_PSENSOR`: PSensor switch (need to restart the device to make the setting take effect)
+        /// * `SFS_USB_FORCE_HOST`: set the Neo3 Pro/Pro Eye device as the host device (not supported by G2 and Neo2 devices)
+        /// * `SFS_SET_DEFAULT_SAFETY_ZONE`: set a default play area for a Neo3 Pro/Pro Eye device (not supported by G2 devices)
+        /// * `SFS_ALLOW_RESET_BOUNDARY`: allow to reset customized boundary. Neo3 Pro/Pro Eye devices can re-customize the boundary (not supported by G2 devices)
+        /// * `SFS_BOUNDARY_CONFIRMATION_SCREEN`: whether to display the boundary confirmation screen (not supported by G2 devices)
+        /// * `SFS_LONG_PRESS_HOME_TO_RECENTER`: long press the Home button to recenter (not supported by G2 devices)
+        /// * `SFS_POWER_CTRL_WIFI_ENABLE`: Neo3 Pro/Pro Eye device stays connected to the network when the device sleeps/turns off (not supported by G2 and Neo2 devices)
+        /// * `SFS_WIFI_DISABLE`: disable Wi-Fi (not supported by G2 and Neo2 devices)
+        /// * `SFS_SIX_DOF_SWITCH`: 6DoF position tracking (not supported by G2 and Neo2 devices)
+        /// * `SFS_INVERSE_DISPERSION`: anti-dispersion (need to restart the device to make the setting take effect; not supported by G2 and Neo2 devices)
+        /// * `SFS_LOGCAT`: system log switch (/data/logs) (not supported by G2 and Neo2 devices)
+        /// * `SFS_PSENSOR`: PSensor switch (need to restart the device to make the setting take effect; not supported by G2 and Neo2 devices)
+        /// * `SFS_SYSTEM_UPDATE_OTA`: OTA upgrade (not supported by G2 and Neo2 devices)
+        /// * `SFS_SYSTEM_UPDATE_APP`: app upgrade and update (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_WLAN_UI`: quickly set whether to show the WLAN button (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_BOUNDARY_UI`: quickly set whether to show the boundary button (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_BLUETOOTH_UI`: quickly set whether to show the bluetooth button (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_CLEAN_TASK_UI`: quickly set whether to show the one-click clear button (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_IPD_ADJUSTMENT_UI`: quickly set whether to show the IPD adjustment button (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_POWER_UI`: quickly set whether to show the power button (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_EDIT_UI`: quickly set whether to show the edit button (not supported by G2 and Neo2 devices)
+        /// * `SFS_BASIC_SETTING_APP_LIBRARY_UI`: the button for customizing the app library (not supported by G2 and Neo2 devices; only supported by system apps)
+        /// * `SFS_BASIC_SETTING_SHORTCUT_UI`: the button for customizing quick settings (not supported by G2 and Neo2 devices; only supported by system apps)
         /// </param>
         /// <param name="switchEnum">Whether to switch the function on/off:
         /// * `S_ON`: switch on
@@ -456,7 +492,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Sets the USB mode.
+        /// Sets the USB configuration mode.
         /// </summary>
         /// <param name="uSBConfigModeEnum">USB configuration mode. Enumerations:
         /// * `MTP`: MTP mode
@@ -469,6 +505,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Sets the duration after which the controllers enter the pairing mode.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
         /// <param name="timeEnum">Duration enumerations:
         /// * `SIX`: 6 seconds
@@ -489,6 +526,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Gets the duration after which the controllers enter the pairing mode.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
         /// <param name="callback">Returns a duration enumeration from the following:
         /// * `SIX`: 6 seconds
@@ -540,7 +578,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Enables the Confirm key.
+        /// Enables the Confirm button.
         /// </summary>
         public static void EnableEnterKey()
         {
@@ -548,7 +586,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Disables the Confirm key.
+        /// Disables the Confirm button.
         /// </summary>
         public static void DisableEnterKey()
         {
@@ -556,7 +594,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Enables the Volume Key.
+        /// Enables the Volume button.
         /// </summary>
         public static void EnableVolumeKey()
         {
@@ -564,7 +602,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Disables the Volume Key.
+        /// Disables the Volume button.
         /// </summary>
         public static void DisableVolumeKey()
         {
@@ -572,7 +610,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Enables the Back Key.
+        /// Enables the Back button.
         /// </summary>
         public static void EnableBackKey()
         {
@@ -580,7 +618,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Disables the Back Key.
+        /// Disables the Back button.
         /// </summary>
         public static void DisableBackKey()
         {
@@ -592,7 +630,7 @@ namespace Unity.XR.PXR
         /// </summary>
         /// <param name="path">The path to the configuration file, e.g., `/data/local/tmp/config.txt`.</param>
         /// <param name="content">The content of the configuration file.</param>
-        /// <param name="callback">Callback:
+        /// <param name="callback">Whether the configuration file has been successfully written:
         /// * `true`: written
         /// * `false`: failed to be written
         /// </param>
@@ -602,9 +640,9 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Resets all keys to default configuration.
+        /// Resets all buttons to default configuration.
         /// </summary>
-        /// <param name="callback">Callback:
+        /// <param name="callback">Whether all keys have been successfully reset to default configuration:
         /// * `true`: reset
         /// * `false`: failed to reset
         /// </param>
@@ -650,7 +688,8 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Freezes the screen to the front. The screen will turn around with the HMD. Note: This function only supports G2 4K series.
+        /// Freezes the screen to the front. The screen will turn around with the HMD.
+        /// @note Only supported by G2 4K and Neo2 devices.
         /// </summary>
         /// <param name="freeze">Whether to freeze the screen:
         /// * `true`: freeze
@@ -673,8 +712,8 @@ namespace Unity.XR.PXR
         /// Gets the status of the screencast function.
         /// </summary>
         /// <returns>The status of the screencast function:
-        /// * `true`: screencast on
-        /// * `false`: screencast off
+        /// * `true`: on
+        /// * `false`: off
         /// </returns>
         public static bool IsMiracastOn()
         {
@@ -690,7 +729,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Starts scanning for devices that can be used for screen casting.
+        /// Starts looking for devices that can be used for screen casting.
         /// </summary>
         public static void StartScan()
         {
@@ -698,7 +737,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Stops scanning for devices that can be used for screen casting.
+        /// Stops looking for devices that can be used for screen casting.
         /// </summary>
         public static void StopScan()
         {
@@ -736,7 +775,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Renames the device connected for screencast (only the name for local storage).
+        /// Renames the device connected for screencast. The name is only for local storage.
         /// </summary>
         /// <param name="address">The MAC address of the device.</param>
         /// <param name="newName">The new device name.</param>
@@ -746,7 +785,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Returns a wdmodel list of the device(s) for screencast.
+        /// Sets the callback for the scanning result, which returns `List<PBS_WifiDisplayModel>` that contains the devices previously connected for screencast and the devices currently found for screencast.
         /// </summary>
         public static void SetWDModelsCallback()
         {
@@ -754,7 +793,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Returns a JSON array of the device(s) for screencast.
+        /// Sets the callback for the scanning result, which returns the JSON string that contains the devices previously connected for screencast and the devices currently found for screencast.
         /// </summary>
         public static void SetWDJsonCallback()
         {
@@ -762,18 +801,18 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Manually updates the device list for screencast.
+        /// Manually updates the list of devices for screencast.
         /// </summary>
-        /// <param name="callback">The device list for screencast.</param>
+        /// <param name="callback">The list of devices for screencast.</param>
         public static void UpdateWifiDisplays(Action<string> callback)
         {
             PXR_EnterprisePlugin.UPxr_UpdateWifiDisplays(callback);
         }
 
         /// <summary>
-        /// Gets the information of the current connected device.
+        /// Gets the information of the currently connected device.
         /// </summary>
-        /// <returns>The information of the current connected device.</returns>
+        /// <returns>The information of the currently connected device.</returns>
         public static string GetConnectedWD()
         {
             return PXR_EnterprisePlugin.UPxr_GetConnectedWD();
@@ -781,6 +820,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Switches the large space scene on.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
         /// <param name="open">Whether to switch the large space scene on:
         /// * `true`: switch on
@@ -797,10 +837,11 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Gets the status of the large space scene.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
-        /// <param name="callback">Callback:
-        /// * `true`: status got
-        /// * `false`: failed to get the status
+        /// <param name="callback">Returns the status of large space:
+        /// * `0`: switched off
+        /// * `1`: switched on
         /// </param>
         public static void GetSwitchLargeSpaceStatus(Action<string> callback)
         {
@@ -809,6 +850,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Saves the large space map.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
         /// <returns>Whether the large space map has been saved:
         /// * `true`: saved
@@ -820,9 +862,10 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Exports map(s).
+        /// Exports maps. The exported maps are stored in the /maps/export file.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
-        /// <param name="callback">Callback:
+        /// <param name="callback">Returns the result:
         /// * `true`: exported
         /// * `false`: failed to export
         /// </param>
@@ -832,9 +875,10 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Imports map(s).
+        /// Imports maps. Need to copy maps to the /maps folder.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
-        /// <param name="callback">Callback:
+        /// <param name="callback">Returns the result:
         /// * `true`: imported
         /// * `false`: failed to import
         /// </param>
@@ -844,9 +888,9 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Gets the CPU utilization of the current device.
+        /// Gets each CPU's utilization for the current device.
         /// </summary>
-        /// <returns>The CPU utilization of the current device.</returns>
+        /// <returns>An array of CPU utilization info.</returns>
         public static float[] GetCpuUsages()
         {
             return PXR_EnterprisePlugin.UPxr_GetCpuUsages();
@@ -856,18 +900,18 @@ namespace Unity.XR.PXR
         /// Gets device temperature in Celsius.
         /// </summary>
         /// <param name="type">The requested type of device temperature:
-        /// * `0`(`DEVICE_TEMPERATURE_CPU`): CPU temperature
-        /// * `1`(`DEVICE_TEMPERATURE_GPU`): GPU temperature
-        /// * `2`(`DEVICE_TEMPERATURE_BATTERY`): battery temperature
-        /// * `3`(`DEVICE_TEMPERATURE_SKIN`): surface temperature
+        /// * `DEVICE_TEMPERATURE_CPU`: CPU temperature
+        /// * `DEVICE_TEMPERATURE_GPU`: GPU temperature
+        /// * `DEVICE_TEMPERATURE_BATTERY`: battery temperature
+        /// * `DEVICE_TEMPERATURE_SKIN`: surface temperature
         /// </param>
         /// <param name="source">The requested source of device temperature:
-        /// * `0`(`TEMPERATURE_CURRENT`): current temperature
-        /// * `1`(`TEMPERATURE_THROTTLING`): temperature threshold for throttling
-        /// * `2`(`TEMPERATURE_SHUTDOWN`): temperature threshold for shutdown
-        /// * `3`(`TEMPERATURE_THROTTLING_BELOW_VR_MIN`): temperature threshold for throttling. If the actual temperature is higher than the threshold, the lowest clock frequency for VR mode will not be met
+        /// * `TEMPERATURE_CURRENT`: current temperature
+        /// * `TEMPERATURE_THROTTLING`: temperature threshold for throttling
+        /// * `TEMPERATURE_SHUTDOWN`: temperature threshold for shutdown
+        /// * `TEMPERATURE_THROTTLING_BELOW_VR_MIN`: temperature threshold for throttling. If the actual temperature is higher than the threshold, the lowest clock frequency for VR mode will not be met
         /// </param>
-        /// <returns>An array of requested device temperatures in Celsius.</returns>
+        /// <returns>An array of requested float device temperatures in Celsius.</returns>
         public static float[] GetDeviceTemperatures(int type, int source)
         {
             return PXR_EnterprisePlugin.UPxr_GetDeviceTemperatures(type, source);
@@ -875,6 +919,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Captures the current screen.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
         public static void Capture()
         {
@@ -883,6 +928,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Records the screen. Call this function again to stop recording.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
         public static void Record()
         {
@@ -907,20 +953,22 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Keeps an app active. In other words, improves the priority of an app, thereby making the system not to force quit the app.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <param name="appPackageName">App package name.</param>
         /// <param name="keepAlive">Whether to keep the app active (i.e., whether to enhance the priority of the app):
         /// * `true`: keep
         /// * `false`: not keep
         /// </param>
-        /// <param name="ext">Reserved parameter, pass `0` by default.</param>
+        /// <param name="ext">Reserved parameter, pass `0`.</param>
         public static void AppKeepAlive(String appPackageName, bool keepAlive, int ext)
         {
             PXR_EnterprisePlugin.UPxr_AppKeepAlive(appPackageName, keepAlive, ext);
         }
 
         /// <summary>
-        /// Schedules auto startup for the device. Note: Supported by Neo 3 series only.
+        /// Schedules auto startup for the device.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
         /// <param name="year">Year, for example, `2022`.</param>
         /// <param name="month">Month, for example, `2`.</param>
@@ -937,7 +985,8 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Schedules auto shutdown for the device. Note: Supported by Neo 3 series only.
+        /// Schedules auto shutdown for the device.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
         /// <param name="year">Year, for example, `2022`.</param>
         /// <param name="month">Month, for example, `2`.</param>
@@ -954,7 +1003,8 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Displays a specified settings screen. Note: Supported by Neo 3 series only.
+        /// Displays a specified settings screen.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
         /// <param name="settingsEnum">The enumerations of settings screen:
         /// * `START_VR_SETTINGS_ITEM_WIFI`: the Wi-Fi settings screen;
@@ -969,29 +1019,29 @@ namespace Unity.XR.PXR
         /// * `true`: display
         /// * `false`: hide
         /// </param>
-        /// <param name="ext">Reserved parameter, pass `0` by default.</param>
+        /// <param name="ext">Reserved parameter, pass `0`.</param>
         public static void StartVrSettingsItem(StartVRSettingsEnum settingsEnum, bool hideOtherItem, int ext)
         {
             PXR_EnterprisePlugin.UPxr_StartVrSettingsItem(settingsEnum, hideOtherItem, ext);
         }
 
         /// <summary>
-        /// Changes the Volume key's function to that of the Home and Enter key's, or restores the volume adjustment function to the Volume key.
-        /// @note Supported by PICO 4 only.
+        /// Changes the Volume button's function to that of the Home and Enter button's, or restores the volume adjustment function to the Volume button.
+        /// @note Only supported by PICO 4 Enterprise.
         /// </summary>
-        /// <param name="switchEnum">Whether to change the Volume key's function:
+        /// <param name="switchEnum">Whether to change the Volume button's function:
         /// * `S_ON`: change
         /// * `S_OFF`: do not change
         /// </param>
-        /// <param name="ext">Reserved parameter, pass `0` by default.</param>
+        /// <param name="ext">Reserved parameter, pass `0`.</param>
         public static void SwitchVolumeToHomeAndEnter(SwitchEnum switchEnum, int ext)
         {
             PXR_EnterprisePlugin.UPxr_SwitchVolumeToHomeAndEnter(switchEnum, ext);
         }
 
         /// <summary>
-        /// Gets whether the Volume key's function has been changed to that of the Home and Enter key's.
-        /// @note Supported by PICO 4 only.
+        /// Gets whether the Volume button's function has been changed to that of the Home and Enter button's.
+        /// @note Only supported by PICO 4 Enterprise.
         /// </summary>
         /// <returns>
         /// * `S_ON`: changed
@@ -1004,12 +1054,13 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Upgrades the OTA.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
         /// <param name="otaPackagePath">The location of the OTA package.</param>
         /// <returns>
         /// * `0`: success
         /// * `1`: failure
-        /// * `2`: OTA package version too low
+        /// * `21`: OTA package version too low
         /// </returns>
         public static int InstallOTAPackage(String otaPackagePath)
         {
@@ -1017,7 +1068,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Gets the configuration of the Wi-Fi nerwork that the device automatically connnects to.
+        /// Gets the configuration of the Wi-Fi network that the device automatically connects to.
         /// </summary>
         /// <returns>The SSID and password of the Wi-Fi network.</returns>
         public static string GetAutoConnectWiFiConfig()
@@ -1027,12 +1078,13 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Gets the scheduled auto startup settings for the device.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
         /// <returns>
         /// * `open`: the status of scheduled auto startup:
         ///   * `true`: enabled
         ///   * `false`: disabled
-        /// * `time`: the time when the device auto starts up. Returned when `open` is `true`.
+        /// * `time`: the time when the device auto starts up, for example, `1658980380000`. Returned when `open` is `true`.
         /// </returns>
         public static string GetTimingStartupStatus()
         {
@@ -1041,12 +1093,13 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Gets the scheduled auto shutdown settings for the device.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
         /// <returns>
         /// * `open`: the status of scheduled auto shutdown:
         ///   * `true`: enabled
         ///   * `false`: disabled
-        /// * `time`: the time when the device auto shuts down. Returned when `open` is `true`.
+        /// * `time`: the time when the device auto shuts down, for example, `1658980380000`. Returned when `open` is `true`.
         /// </returns>
         public static string GetTimingShutdownStatus()
         {
@@ -1054,9 +1107,10 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Gets the status of a specified controller key.
+        /// Gets the status of a specified controller button.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
-        /// <param name="pxrControllerKey">The enumerations of controller key:
+        /// <param name="pxrControllerKey">The enumerations of controller button:
         /// * `CONTROLLER_KEY_JOYSTICK` 
         /// * `CONTROLLER_KEY_MENU`
         /// * `CONTROLLER_KEY_TRIGGER`
@@ -1067,7 +1121,7 @@ namespace Unity.XR.PXR
         /// * `CONTROLLER_KEY_LEFT_GRIP`
         /// * `CONTROLLER_KEY_RIGHT_GRIP`
         /// </param>
-        /// <returns>The key's status:
+        /// <returns>The button's status:
         /// * `0`: disabled
         /// * `1`: enabled
         /// </returns>
@@ -1077,9 +1131,10 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Sets the status of a specified controller key.
+        /// Enables or disables a specified controller button.
+        /// @note Not supported by G2 4K devices.
         /// </summary>
-        /// <param name="pxrControllerKey">The enumerations of controller key:
+        /// <param name="pxrControllerKey">The enumerations of controller button:
         /// * `CONTROLLER_KEY_JOYSTICK` 
         /// * `CONTROLLER_KEY_MENU`
         /// * `CONTROLLER_KEY_TRIGGER`
@@ -1090,21 +1145,24 @@ namespace Unity.XR.PXR
         /// * `CONTROLLER_KEY_LEFT_GRIP`
         /// * `CONTROLLER_KEY_RIGHT_GRIP`
         /// </param>
-        /// <param name="status">Whether to switch the function on/off:
-        /// * `S_ON`: switch on
-        /// * `S_OFF`: switch off
+        /// <param name="status">Whether to enable or disable the button:
+        /// * `S_ON`: enable
+        /// * `S_OFF`: disable
         /// </param>
+        /// <returns>
+        /// `0` indicates success, other values indicate failure.
+        /// </returns>
         public static int SetControllerKeyState(ControllerKeyEnum pxrControllerKey, SwitchEnum status)
         {
             return PXR_EnterprisePlugin.UPxr_SetControllerKeyState(pxrControllerKey, status);
         }
 
         /// <summary>
-        /// Gets the status of the switch for setting whether to power off the USB cable when the device is shut down.
+        /// Gets the status of the switch which is for powering off the USB cable when the device is shut down.
         /// </summary>
         /// <returns>The switch's status:
-        /// * `PBS_SwitchEnum#S_ON`: on
-        /// * `PBS_SwitchEnum#S_OFF`: off
+        /// * `S_ON`: on
+        /// * `S_OFF`: off
         /// </returns>
         public static SwitchEnum GetPowerOffWithUSBCable()
         {
@@ -1130,7 +1188,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Gets the Power key's settings.
+        /// Gets the current settings for the Power button.
         /// </summary>
         /// <returns>
         /// * `null`: not set
@@ -1144,7 +1202,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Get the Enter key's status.
+        /// Get the Enter button's status.
         /// </summary>
         /// <returns>
         /// * `0`: disabled
@@ -1156,7 +1214,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Get the Volume key's status.
+        /// Get the Volume button's status.
         /// </summary>
         /// <returns>
         /// * `0`: disabled
@@ -1168,7 +1226,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Get the Back key's status.
+        /// Get the Back button's status.
         /// </summary>
         /// <returns>
         /// * `0`: disabled
@@ -1180,7 +1238,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Gets the event setting for the Home key.
+        /// Gets the event settings for the Home button.
         /// </summary>
         /// <param name="homeEvent">The enumerations of event type:
         /// * `SINGLE_CLICK`: single-click event
@@ -1190,7 +1248,7 @@ namespace Unity.XR.PXR
         /// <returns>
         /// * For `SINGLE_CLICK` and `DOUBLE_CLICK`, the event(s) you set will be returned.
         /// * For `LONG_PRESS`, the time and event you set will be returned. If you have not set a time for a long-press event, time will be `null`.
-        /// @note
+        /// 
         /// * If you have not set any event for the event type you pass in the request, the response will return `null`.
         /// * For event enumerations, see `PropertySetHomeKey` or `PropertySetHomeKeyAll`.
         /// </returns>
@@ -1206,36 +1264,56 @@ namespace Unity.XR.PXR
         /// * `SFS_USB`: USB debugging
         /// * `SFS_AUTOSLEEP`: auto sleep
         /// * `SFS_SCREENON_CHARGING`: screen-on charging
-        /// * `SFS_OTG_CHARGING`: OTG charging
-        /// * `SFS_RETURN_MENU_IN_2DMODE`: display the Return icon on the 2D screen
+        /// * `SFS_OTG_CHARGING`: OTG charging (only supported by G2 and Neo2 devices)
+        /// * `SFS_RETURN_MENU_IN_2DMODE`: display the Return icon on the 2D screen (only supported by G2 devices)
         /// * `SFS_COMBINATION_KEY`: combination key
-        /// * `SFS_CALIBRATION_WITH_POWER_ON`: calibration with power on
+        /// * `SFS_CALIBRATION_WITH_POWER_ON`: calibration with power on (only supported by G2 devices)
         /// * `SFS_SYSTEM_UPDATE`: system update
-        /// * `SFS_CAST_SERVICE`: phone casting service
+        /// * `SFS_CAST_SERVICE`: phone casting service (only supported by G2 and Neo3 Pro/Pro Eye devices)
         /// * `SFS_EYE_PROTECTION`: eye-protection mode
-        /// * `SFS_SECURITY_ZONE_PERMANENTLY`: permanently disable the 6DoF play area 
-        /// * `SFS_Auto_Calibration`: auto recenter/recalibrate
+        /// * `SFS_SECURITY_ZONE_PERMANENTLY`: permanently disable the 6DoF play area (not supported by G2 devices)
+        /// * `SFS_GLOBAL_CALIBRATION`: global calibration (only supported by G2 devices)
+        /// * `SFS_Auto_Calibration`: auto calibration (only supported by G2 devices)
         /// * `SFS_USB_BOOT`: USB plug-in boot
-        /// * `SFS_VOLUME_UI`: global volume UI
+        /// * `SFS_VOLUME_UI`: global volume UI (need to restart the device to make the setting take effect)
         /// * `SFS_CONTROLLER_UI`: global controller connected UI
         /// * `SFS_NAVGATION_SWITCH`: navigation bar
         /// * `SFS_SHORTCUT_SHOW_RECORD_UI`: screen recording button UI
-        /// * `SFS_SHORTCUT_SHOW_FIT_UI`: PICO fit UI
+        /// * `SFS_SHORTCUT_SHOW_FIT_UI`: PICO fit UI (only supported by Neo devices for Chinese Mainland)
         /// * `SFS_SHORTCUT_SHOW_CAST_UI`: screencast button UI
         /// * `SFS_SHORTCUT_SHOW_CAPTURE_UI`: screenshot button UI
-        /// * `SFS_USB_FORCE_HOST`: set the Neo3 device as the host device
-        /// * `SFS_SET_DEFAULT_SAFETY_ZONE`: set a default play area for a Neo3 device
-        /// * `SFS_ALLOW_RESET_BOUNDARY`: allow to reset customized boundary
-        /// * `SFS_BOUNDARY_CONFIRMATION_SCREEN`: whether to display the boundary confirmation screen
-        /// * `SFS_LONG_PRESS_HOME_TO_RECENTER`: long press the Home key to recenter
-        /// * `SFS_POWER_CTRL_WIFI_ENABLE`: Neo3 device stays connected to the network when the device sleeps/turns off
-        /// * `SFS_WIFI_DISABLE`: disable Wi-Fi for Neo3 device
-        /// * `SFS_SIX_DOF_SWITCH`: 6DoF position tracking
-        /// * `SFS_INVERSE_DISPERSION`: anti-dispersion
+        /// * `SFS_USB_FORCE_HOST`: set the Neo3 Pro/Pro Eye device as the host device (not supported by G2 and Neo2 devices)
+        /// * `SFS_SET_DEFAULT_SAFETY_ZONE`: set a default play area for a Neo3 Pro/Pro Eye device (not supported by G2 devices)
+        /// * `SFS_ALLOW_RESET_BOUNDARY`: allow to reset customized boundary. Neo3 Pro/Pro Eye devices supports recustomizing the boundary (not supported by G2 devices)
+        /// * `SFS_BOUNDARY_CONFIRMATION_SCREEN`: whether to display the boundary confirmation screen (not supported by G2 devices)
+        /// * `SFS_LONG_PRESS_HOME_TO_RECENTER`: long press the Home button to recenter (not supported by G2 devices)
+        /// * `SFS_POWER_CTRL_WIFI_ENABLE`: Neo3 Pro/Pro Eye device stays connected to the network when the device sleeps/turns off (not supported by G2 and Neo2 devices)
+        /// * `SFS_WIFI_DISABLE`: disable Wi-Fi (not supported by G2 and Neo2 devices)
+        /// * `SFS_SIX_DOF_SWITCH`: 6DoF position tracking (not supported by G2 and Neo2 devices)
+        /// * `SFS_INVERSE_DISPERSION`: anti-dispersion (need to restart the device to make the setting take effect; not supported by G2 and Neo2 devices)
+        /// * `SFS_LOGCAT`: system log switch (/data/logs) (not supported by G2 and Neo2 devices)
+        /// * `SFS_PSENSOR`: PSensor switch (need to restart the device to make the setting take effect; not supported by G2 and Neo2 devices)
+        /// * `SFS_SYSTEM_UPDATE_OTA`: OTA upgrade (not supported by G2 and Neo2 devices)
+        /// * `SFS_SYSTEM_UPDATE_APP`: app upgrade and update (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_WLAN_UI`: quickly set whether to show the WLAN button (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_BOUNDARY_UI`: quickly set whether to show the boundary button (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_BLUETOOTH_UI`: quickly set whether to show the bluetooth button (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_CLEAN_TASK_UI`: quickly set whether to show the one-click clear button (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_IPD_ADJUSTMENT_UI`: quickly set whether to show the IPD adjustment button (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_POWER_UI`: quickly set whether to show the power button (not supported by G2 and Neo2 devices)
+        /// * `SFS_SHORTCUT_SHOW_EDIT_UI`: quickly set whether to show the edit button (not supported by G2 and Neo2 devices)
+        /// * `SFS_BASIC_SETTING_APP_LIBRARY_UI`: the button for customizing the app library (not supported by G2 and Neo2 devices; only supported by system apps)
+        /// * `SFS_BASIC_SETTING_SHORTCUT_UI`: the button for customizing quick settings (not supported by G2 and Neo2 devices; only supported by system apps)
         /// </param>
         /// <param name="callback">The callback that returns the switch's status:
         /// * `0`: off
         /// * `1`: on
+        /// * `2`: not supported by device
+        /// For `SFS_SYSTEM_UPDATE`, the returns are as follows:
+        /// * `0`: off
+        /// * `1`: OTA upgrade on
+        /// * `2`: app upgrade on
+        /// * `3`: OTA and app upgrade on
         /// </param>
         public static void GetSwitchSystemFunctionStatus(SystemFunctionSwitchEnum systemFunction, Action<int> callback)
         {
@@ -1265,15 +1343,17 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Initializes the screencast service.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <param name="callback">The callback:
         /// * `0`: disconnect
         /// * `1`: connect
-        /// * `2`: no mic permission
+        /// * `2`: no microphone permission
         /// </param>
         /// <returns>
         /// * `0`: failure
         /// * `1`: success
+        /// Returns `0` when there is no microphone permission.
         /// </returns>
         public static int PICOCastInit(Action<int> callback)
         {
@@ -1282,6 +1362,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Sets whether to show the screencast authorization window.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <param name="authZ">
         /// * `0`: ask every time (default)
@@ -1299,6 +1380,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Gets the setting of whether to show the screencast authorization window.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <returns>
         /// * `0`: ask every time (default)
@@ -1312,6 +1394,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Gets the URL for screencast.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <param name="urlType">The enumerations of URL type:
         /// * `NormalURL`: Normal URL. The screencast authorization window will show if it is not set.
@@ -1326,6 +1409,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         ///  Stops screencast.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <returns>
         /// * `0`: failure
@@ -1337,7 +1421,8 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// sets screencast-related properties.
+        /// sets screencast options.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <param name="castOptionOrStatus">The enumerations of the property to set:
         /// * `OPTION_RESOLUTION_LEVEL`: resolution level
@@ -1369,13 +1454,14 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Gets the screencast-related property setting for the current device.
+        /// Gets the screencast settings for the current device.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <param name="castOptionOrStatus">The enumerations of the screencast property to get setting for:
         /// * `OPTION_RESOLUTION_LEVEL`: resolution level
         /// * `OPTION_BITRATE_LEVEL`: bitrate level
         /// * `OPTION_AUDIO_ENABLE`: whether the audio is enabled
-        /// * `PICOCAST_STATUS`: returns the current screemcast status
+        /// * `PICOCAST_STATUS`: returns the current screencast status
         /// </param>
         /// <returns>The setting of the selected property:
         /// * For `OPTION_RESOLUTION_LEVEL`:
@@ -1403,8 +1489,8 @@ namespace Unity.XR.PXR
 
         /// <summary>Sets the system language for the device. 
         /// For a language that is spoken in different countries/regions, the system language is then co-set by the language code and the device's country/region code. 
-        /// For example, if the lanaguage code is set to `en` and the device's country/region code is `US`, the system language will be set to English (United States).</summary>
-        /// @note Only supported by PICO 4.
+        /// For example, if the language code is set to `en` and the device's country/region code is `US`, the system language will be set to English (United States).</summary>
+        /// @note Not supported by G2 4K devices.
         ///
         /// <param name="language">Supported language codes:
         /// * `cs`: Čeština (Czech)
@@ -1442,7 +1528,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>Gets the device's system language.</summary>
-        /// @note Only supported by PICO 4.
+        /// @note Not supported by G2 4K devices.
         ///
         /// <returns>The system language set for the device. For details, refer to the 
         /// parameter description for `SetSystemLanguage`.</returns>
@@ -1452,7 +1538,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>Sets a default Wi-Fi network for the device. Once set, the device will automatically connect to the Wi-Fi network if accessible.</summary>
-        /// @note Only supported by PICO 4.
+        /// @note Not supported by G2 4K devices.
         /// 
         /// <param name="ssid">The SSID (name) of the Wi-Fi network.</param>
         /// <param name="pwd">The password of the Wi-Fi network.</param>
@@ -1466,7 +1552,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>Gets the device's default Wi-Fi network.</summary>
-        /// @note Only supported by PICO 4.
+        /// @note Not supported by G2 4K devices.
         /// 
         /// <returns>The SSID (name) of the Wi-Fi network.</returns>
         public static String[] GetConfiguredWifi()
@@ -1475,9 +1561,9 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>Sets a country/region for the device.</summary>
-        /// @note Only supported by PICO 4 in non-Mainland China countries/regions.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later. This API works only before initialization is completed.
         /// 
-        /// <param name="countryCode">The country/region code co-determines the device's system lanaguge with the language code you set via `SetSystemLanguage`.
+        /// <param name="countryCode">The country/region code co-determines the device's system language with the language code you set via `SetSystemLanguage`.
         /// Below are supported country/region codes:
         /// * `AD`: Andorra
         /// * `AT`: Austria
@@ -1535,7 +1621,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>Gets the device's country/region code.</summary>
-        /// @note Only supported by PICO 4.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later. This API works only before initialization is completed.
         ///
         /// <returns>A string value that indicates the device's current country/region code. 
         /// For supported country/region codes, see the parameter description in `SetSystemCountryCode`.</returns>
@@ -1545,7 +1631,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>Sets the page to skip in initialization settings.</summary>
-        /// @note Only supported by PICO 4.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later. This API works only before initialization is completed.
         ///
         /// <param name="flag">Set the flag.
         /// The first 6 bits are valid, the 7th to 32rd bits are reserved. For each bit, `0` indicates showing and `1` indicates hiding.
@@ -1571,7 +1657,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>Gets the page to skip in initialization settings.</summary>
-        /// @note Only supported by PICO 4.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later. This API works only before initialization is completed.
         ///
         /// <returns>Returns the flag set in `SetSkipInitSettingPage`.</returns>
         public static int GetSkipInitSettingPage()
@@ -1580,7 +1666,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>Gets whether the initialization settings have been complete.</summary>
-        /// @note Only supported by PICO 4.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later. This API works only before initialization is completed.
         ///
         /// <returns> 
         /// * `0`: not complete
@@ -1592,6 +1678,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>Starts an activity in another app.</summary>
+        /// @note Not supported by G2 4K devices.
         /// <param name="packageName">(Optional) The app's package name.</param>
         /// <param name="className">(Optional) The app's class name.</param>
         /// <param name="action">(Optional) The action to be performed.</param>
@@ -1613,7 +1700,7 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>Shows/hides specified app(s) in the library.
-        /// @note Only supported by PICO Neo3 and PICO 4 series.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <param name="packageNames">Package name(s). If there are multiple names, use commas (,) to separate them.</param>
         /// <param name="switchEnum">Specifies to show/hide the app(s), enums:
@@ -1630,8 +1717,8 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Gets the controller battery level.
-        /// @note Only supported by PICO Neo3 and PICO 4 series.
+        /// Gets the controller's battery level.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <returns>Returns the following information: 
         /// * array[0]: the left controller's battery level
@@ -1644,8 +1731,8 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Gets the controller connectivity status.
-        /// @note Only supported by PICO Neo3 and PICO 4 series.
+        /// Gets the controller's connection status.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <returns>
         /// * `0`: both controllers are disconnected
@@ -1660,7 +1747,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Gets the apps that are hidden in the library.
-        /// @note Only supported by PICO Neo3 and PICO 4 series.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <returns>The packages names of hidden apps. Multiple names are separated by commas (,).</returns>
         public static string GetAppLibraryHideList()
@@ -1670,7 +1757,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Sets the device that outputs audio during screen casting.
-        /// @note Only supported by PICO Neo3 series, PICO 4 Enterprise, and PICO G3.
+        /// @note Only supported by PICO Neo3 Pro/Pro Eye and PICO 4 Enterprise devices.
         /// </summary>
         /// <param name="screencastAudioOutput">Specifies the device that outputs audio. Enumerations:
         /// `AUDIO_SINK`: the HMD
@@ -1688,7 +1775,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Gets the device that outputs audio during screen casting.
-        /// @note Only supported by PICO Neo3 series, PICO 4 Enterprise, and PICO G3.
+        /// @note Only supported by PICO Neo3 Pro/Pro Eye and PICO 4 Enterprise devices.
         /// </summary>
         /// <returns>
         /// Enumerations:
@@ -1703,7 +1790,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Displays or hides the specified tab or option on the Settings pane.
-        /// @note Do not support PICO G2 4K. Developing on PICO Neo3 devices requires PUI5.0 or later.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <param name="customizeSettingsTabEnum">Specifies the tab or option to display or hide. Enumerations:
         /// * `CUSTOMIZE_SETTINGS_TAB_WLAN`: the "WLAN" tab
@@ -1729,7 +1816,7 @@ namespace Unity.XR.PXR
 
         /// <summary>
         /// Gets the status set for the specified tab or option on the Settings pane.
-        /// @note Do not support PICO G2 4K. Developing on PICO Neo3 devices requires PUI5.0 or later.
+        /// @note Not supported by G2 4K devices. For Neo3 Pro/Pro Eye devices, the device's system version should be 5.0.0 or later.
         /// </summary>
         /// <param name="customizeSettingsTabEnum">Specifies the tab or option to get status for. Enumerations:
         /// * `CUSTOMIZE_SETTINGS_TAB_WLAN`: the "WLAN" tab

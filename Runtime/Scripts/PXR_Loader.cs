@@ -104,6 +104,7 @@ namespace Unity.XR.PXR
                 PXR_Plugin.System.UPxr_SetFitnessBandNumberOfConnectionsCallBack(FitnessBandNumberOfConnectionsFunction);
                 PXR_Plugin.System.UPxr_SetFitnessBandElectricQuantityCallBack(FitnessBandElectricQuantityFunction);
                 PXR_Plugin.System.UPxr_SetFitnessBandAbnormalCalibrationDataCallBack(FitnessBandAbnormalCalibrationDataFunction);
+                PXR_Plugin.System.UPxr_SetLoglevelChangedCallBack(LoglevelChangedFunction);
                 PXR_Plugin.System.UPxr_SetUserDefinedSettings(userDefinedSettings);
 
             }
@@ -208,6 +209,14 @@ namespace Unity.XR.PXR
             }
         }
 
+        [MonoPInvokeCallback(typeof(LoglevelChangedCallBack))]
+        static void LoglevelChangedFunction(int value)
+        {
+            if (PXR_Plugin.System.LoglevelChangedChanged != null)
+            {
+                PXR_Plugin.System.LoglevelChangedChanged(value);
+            }
+        }
 
         public PXR_Settings GetSettings()
         {

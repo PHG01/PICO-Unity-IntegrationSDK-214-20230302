@@ -195,6 +195,16 @@ namespace Pico.Platform
                     });
                     break;
                 }
+                case MessageType.User_GetOrgScopedID:
+                {
+                    msg = new Message<OrgScopedID>(msgPointer, ptr =>
+                    {
+                        var obj = CLIB.ppf_Message_GetOrgScopedID(ptr);
+                        if (obj == IntPtr.Zero) return null;
+                        return new OrgScopedID(obj);
+                    });
+                    break;
+                }
                 case MessageType.User_LaunchFriendRequestFlow:
                 {
                     msg = new Message<LaunchFriendResult>(msgPointer, ptr =>
