@@ -232,14 +232,10 @@ namespace Pico.Platform
         /// <summary>
         /// Requests user permissions. The user will received a pop-up notification window.
         /// </summary>
-        /// <param name="permissionList">The list of permissions to request. You can use constants in \ref Pico.Platform.Models.Permissions. The permissions includes:
-        /// * `user_info`: the permission to get the user's basic information, such as the nickname and profile picture.
-        /// * `friend_relation`: the permission to get the user's friend list and invitable users.
-        /// * `sports_userinfo`: the permission to get the user's information set in the sport center.
-        /// * `sports_summarydata`: the permission to get a summary of the user's exercise data.
+        /// <param name="permissionList">The list of permissions to request. You can use constants in \ref Pico.Platform.Models.Permissions.
         /// </param>
         /// <returns>A struct containing the access token and permission list.</returns>
-        public static Task<PermissionResult> RequestUserPermissions(string[] permissionList)
+        public static Task<PermissionResult> RequestUserPermissions(params string[] permissionList)
         {
             if (!CoreService.Initialized)
             {

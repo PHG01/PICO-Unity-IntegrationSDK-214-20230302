@@ -180,12 +180,31 @@ namespace Pico.Platform.Models
     }
 
 
+    /// <summary>
+    /// User permissions list.
+    /// </summary>
     public static class Permissions
     {
+        /// <summary>
+        /// The permission to get the user's registration information, including the user's nickname, gender, profile photo, and more.
+        /// </summary>
         public const string UserInfo = "user_info";
+        /// <summary>
+        /// The permission to get users' friend relations.
+        /// </summary>
         public const string FriendRelation = "friend_relation";
+        /// <summary>
+        /// The permission to get the user's information, including the user's gender, birthday, stature, weight, and more, on the PICO Fitness app.
+        /// </summary>
         public const string SportsUserInfo = "sports_userinfo";
+        /// <summary>
+        /// The permission to get users' exercise data from the PICO Fitness app.
+        /// </summary>
         public const string SportsSummaryData = "sports_summarydata";
+        /// <summary>
+        /// The permission to capture or record the screen, which is required when using the highlight service.
+        /// </summary>
+        public const string RecordHighlight = "record_highlight";
     }
 
 

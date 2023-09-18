@@ -293,11 +293,7 @@ namespace Unity.XR.PXR
             }
             else
             {
-                if (isDynamic)
-                {
-                    overlayParam.layerFlags = 0;
-                }
-                else
+                if (!isDynamic)
                 {
                     overlayParam.layerFlags |= (UInt32)PxrLayerCreateFlags.PxrLayerFlagStaticImage;
                 }

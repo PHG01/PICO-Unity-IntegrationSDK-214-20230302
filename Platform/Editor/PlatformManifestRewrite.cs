@@ -36,10 +36,17 @@ namespace Pico.Platform.Editor
             doc.Load(manifestPath);
             var app = doc.SelectSingleNode("//application");
             if (app == null) return;
+            
             var appIdNode = doc.CreateElement("meta-data");
             appIdNode.SetAttribute("name", androidUri, "pvr.app.id");
             appIdNode.SetAttribute("value", androidUri, appId);
             app.AppendChild(appIdNode);
+            
+            var highlightNode = doc.CreateElement("meta-data");
+            highlightNode.SetAttribute("name", androidUri, "use_record_highlight_feature");
+            highlightNode.SetAttribute("value", androidUri, PicoGs.useHighlight.ToString());
+            app.AppendChild(highlightNode);
+            
             doc.Save(manifestPath);
         }
     }

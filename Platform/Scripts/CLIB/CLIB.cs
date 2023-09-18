@@ -791,8 +791,11 @@ namespace Pico.Platform
 
         public static bool ppf_User_GetPresenceIsJoinable(__IntPtr obj)
         {
+#if !UNITY_EDITOR
             var __ret = __Internal.ppf_User_GetPresenceIsJoinable(obj);
             return __ret;
+#endif
+            return true;
         }
 
         public static string ppf_User_GetStoreRegion(__IntPtr obj)
@@ -975,6 +978,40 @@ namespace Pico.Platform
         public static string ppf_ApplicationVersion_GetLatestName(__IntPtr obj)
         {
             var __ret = __Internal.ppf_ApplicationVersion_GetLatestName(obj);
+            return Pico.Platform.MarshalUtil.GetString(global::System.Text.Encoding.UTF8, __ret);
+        }
+    }
+
+    public partial class CLIB
+    {
+        public partial struct __Internal
+        {
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_AsrResult_GetText", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_AsrResult_GetText(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_AsrResult_GetIsFinalResult", CallingConvention = __CallingConvention.Cdecl)]
+            [return: MarshalAs(UnmanagedType.I1)]
+            internal static extern bool ppf_AsrResult_GetIsFinalResult(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_AsrResult_GetSessionId", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_AsrResult_GetSessionId(__IntPtr obj);
+        }
+
+        public static string ppf_AsrResult_GetText(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_AsrResult_GetText(obj);
+            return Pico.Platform.MarshalUtil.GetString(global::System.Text.Encoding.UTF8, __ret);
+        }
+
+        public static bool ppf_AsrResult_GetIsFinalResult(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_AsrResult_GetIsFinalResult(obj);
+            return __ret;
+        }
+
+        public static string ppf_AsrResult_GetSessionId(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_AsrResult_GetSessionId(obj);
             return Pico.Platform.MarshalUtil.GetString(global::System.Text.Encoding.UTF8, __ret);
         }
     }
@@ -1350,6 +1387,30 @@ namespace Pico.Platform
         public static string ppf_AssetStatus_GetDownloadStatus(__IntPtr obj)
         {
             var __ret = __Internal.ppf_AssetStatus_GetDownloadStatus(obj);
+            return Pico.Platform.MarshalUtil.GetString(global::System.Text.Encoding.UTF8, __ret);
+        }
+    }
+
+    public partial class CLIB
+    {
+        public partial struct __Internal
+        {
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_CaptureInfo_GetImagePath", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_CaptureInfo_GetImagePath(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_CaptureInfo_GetJobId", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_CaptureInfo_GetJobId(__IntPtr obj);
+        }
+
+        public static string ppf_CaptureInfo_GetImagePath(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_CaptureInfo_GetImagePath(obj);
+            return Pico.Platform.MarshalUtil.GetString(global::System.Text.Encoding.UTF8, __ret);
+        }
+
+        public static string ppf_CaptureInfo_GetJobId(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_CaptureInfo_GetJobId(obj);
             return Pico.Platform.MarshalUtil.GetString(global::System.Text.Encoding.UTF8, __ret);
         }
     }
@@ -2892,6 +2953,85 @@ namespace Pico.Platform
         {
             var __ret = __Internal.ppf_Rtc_PushExternalAudioFrame(audioFrame);
             return __ret;
+        }
+    }
+
+    public partial class CLIB
+    {
+        public partial struct __Internal
+        {
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_StartAsrOptions_Destroy", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void ppf_StartAsrOptions_Destroy(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_StartAsrOptions_Create", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_StartAsrOptions_Create();
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_StartAsrOptions_SetAutoStop", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void ppf_StartAsrOptions_SetAutoStop(__IntPtr obj, bool value);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_StartAsrOptions_SetVadMaxDurationInSeconds", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void ppf_StartAsrOptions_SetVadMaxDurationInSeconds(__IntPtr obj, int value);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_StartAsrOptions_SetShowPunctual", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void ppf_StartAsrOptions_SetShowPunctual(__IntPtr obj, bool value);
+        }
+
+        public static void ppf_StartAsrOptions_Destroy(__IntPtr obj)
+        {
+            __Internal.ppf_StartAsrOptions_Destroy(obj);
+        }
+
+        public static __IntPtr ppf_StartAsrOptions_Create()
+        {
+            var __ret = __Internal.ppf_StartAsrOptions_Create();
+            return __ret;
+        }
+
+        public static void ppf_StartAsrOptions_SetAutoStop(__IntPtr obj, bool value)
+        {
+            __Internal.ppf_StartAsrOptions_SetAutoStop(obj, value);
+        }
+
+        public static void ppf_StartAsrOptions_SetVadMaxDurationInSeconds(__IntPtr obj, int value)
+        {
+            __Internal.ppf_StartAsrOptions_SetVadMaxDurationInSeconds(obj, value);
+        }
+
+        public static void ppf_StartAsrOptions_SetShowPunctual(__IntPtr obj, bool value)
+        {
+            __Internal.ppf_StartAsrOptions_SetShowPunctual(obj, value);
+        }
+    }
+
+    public partial class CLIB
+    {
+        public partial struct __Internal
+        {
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Speech_InitAsrEngine", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern global::Pico.Platform.AsrEngineInitResult ppf_Speech_InitAsrEngine();
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Speech_StartAsr", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern int ppf_Speech_StartAsr(__IntPtr option);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Speech_StopAsr", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void ppf_Speech_StopAsr();
+        }
+
+        public static global::Pico.Platform.AsrEngineInitResult ppf_Speech_InitAsrEngine()
+        {
+            var __ret = __Internal.ppf_Speech_InitAsrEngine();
+            return __ret;
+        }
+
+        public static int ppf_Speech_StartAsr(__IntPtr option)
+        {
+            var __ret = __Internal.ppf_Speech_StartAsr(option);
+            return __ret;
+        }
+
+        public static void ppf_Speech_StopAsr()
+        {
+            __Internal.ppf_Speech_StopAsr();
         }
     }
 
@@ -5969,6 +6109,39 @@ namespace Pico.Platform
     {
         public partial struct __Internal
         {
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_SpeechError_GetMessage", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_SpeechError_GetMessage(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_SpeechError_GetSessionId", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_SpeechError_GetSessionId(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_SpeechError_GetCode", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern int ppf_SpeechError_GetCode(__IntPtr obj);
+        }
+
+        public static string ppf_SpeechError_GetMessage(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_SpeechError_GetMessage(obj);
+            return Pico.Platform.MarshalUtil.GetString(global::System.Text.Encoding.UTF8, __ret);
+        }
+
+        public static string ppf_SpeechError_GetSessionId(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_SpeechError_GetSessionId(obj);
+            return Pico.Platform.MarshalUtil.GetString(global::System.Text.Encoding.UTF8, __ret);
+        }
+
+        public static int ppf_SpeechError_GetCode(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_SpeechError_GetCode(obj);
+            return __ret;
+        }
+    }
+
+    public partial class CLIB
+    {
+        public partial struct __Internal
+        {
             [DllImport("pxrplatformloader", EntryPoint = "ppf_OrgScopedID_GetID", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern __IntPtr ppf_OrgScopedID_GetID(__IntPtr obj);
         }
@@ -5977,6 +6150,99 @@ namespace Pico.Platform
         {
             var __ret = __Internal.ppf_OrgScopedID_GetID(obj);
             return Pico.Platform.MarshalUtil.GetString(global::System.Text.Encoding.UTF8, __ret);
+        }
+    }
+
+    public partial class CLIB
+    {
+        public partial struct __Internal
+        {
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_RecordInfo_GetVideoPath", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_RecordInfo_GetVideoPath(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_RecordInfo_GetJobId", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_RecordInfo_GetJobId(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_RecordInfo_GetDurationInMilliSeconds", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern int ppf_RecordInfo_GetDurationInMilliSeconds(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_RecordInfo_GetWidth", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern int ppf_RecordInfo_GetWidth(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_RecordInfo_GetHeight", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern int ppf_RecordInfo_GetHeight(__IntPtr obj);
+        }
+
+        public static string ppf_RecordInfo_GetVideoPath(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_RecordInfo_GetVideoPath(obj);
+            return Pico.Platform.MarshalUtil.GetString(global::System.Text.Encoding.UTF8, __ret);
+        }
+
+        public static string ppf_RecordInfo_GetJobId(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_RecordInfo_GetJobId(obj);
+            return Pico.Platform.MarshalUtil.GetString(global::System.Text.Encoding.UTF8, __ret);
+        }
+
+        public static int ppf_RecordInfo_GetDurationInMilliSeconds(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_RecordInfo_GetDurationInMilliSeconds(obj);
+            return __ret;
+        }
+
+        public static int ppf_RecordInfo_GetWidth(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_RecordInfo_GetWidth(obj);
+            return __ret;
+        }
+
+        public static int ppf_RecordInfo_GetHeight(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_RecordInfo_GetHeight(obj);
+            return __ret;
+        }
+    }
+
+    public partial class CLIB
+    {
+        public partial struct __Internal
+        {
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_SessionMedia_GetImages", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_SessionMedia_GetImages(__IntPtr obj, UIntPtr index);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_SessionMedia_GetImagesSize", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern UIntPtr ppf_SessionMedia_GetImagesSize(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_SessionMedia_GetVideos", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_SessionMedia_GetVideos(__IntPtr obj, UIntPtr index);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_SessionMedia_GetVideosSize", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern UIntPtr ppf_SessionMedia_GetVideosSize(__IntPtr obj);
+        }
+
+        public static __IntPtr ppf_SessionMedia_GetImages(__IntPtr obj, UIntPtr index)
+        {
+            var __ret = __Internal.ppf_SessionMedia_GetImages(obj, index);
+            return __ret;
+        }
+
+        public static UIntPtr ppf_SessionMedia_GetImagesSize(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_SessionMedia_GetImagesSize(obj);
+            return __ret;
+        }
+
+        public static __IntPtr ppf_SessionMedia_GetVideos(__IntPtr obj, UIntPtr index)
+        {
+            var __ret = __Internal.ppf_SessionMedia_GetVideos(obj, index);
+            return __ret;
+        }
+
+        public static UIntPtr ppf_SessionMedia_GetVideosSize(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_SessionMedia_GetVideosSize(obj);
+            return __ret;
         }
     }
 
@@ -6210,11 +6476,26 @@ namespace Pico.Platform
             [DllImport("pxrplatformloader", EntryPoint = "ppf_Message_GetAssetFileDeleteForSafety", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern __IntPtr ppf_Message_GetAssetFileDeleteForSafety(__IntPtr obj);
 
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Message_GetAsrResult", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_Message_GetAsrResult(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Message_GetSpeechError", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_Message_GetSpeechError(__IntPtr obj);
+
             [DllImport("pxrplatformloader", EntryPoint = "ppf_Message_GetDetectSensitiveResult", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern __IntPtr ppf_Message_GetDetectSensitiveResult(__IntPtr obj);
 
             [DllImport("pxrplatformloader", EntryPoint = "ppf_Message_GetOrgScopedID", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern __IntPtr ppf_Message_GetOrgScopedID(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Message_GetCaptureInfo", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_Message_GetCaptureInfo(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Message_GetRecordInfo", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_Message_GetRecordInfo(__IntPtr obj);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Message_GetSessionMedia", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern __IntPtr ppf_Message_GetSessionMedia(__IntPtr obj);
         }
 
         public static __IntPtr ppf_Message_GetUser(__IntPtr obj)
@@ -6667,6 +6948,18 @@ namespace Pico.Platform
             return __ret;
         }
 
+        public static __IntPtr ppf_Message_GetAsrResult(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_Message_GetAsrResult(obj);
+            return __ret;
+        }
+
+        public static __IntPtr ppf_Message_GetSpeechError(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_Message_GetSpeechError(obj);
+            return __ret;
+        }
+
         public static __IntPtr ppf_Message_GetDetectSensitiveResult(__IntPtr obj)
         {
             var __ret = __Internal.ppf_Message_GetDetectSensitiveResult(obj);
@@ -6676,6 +6969,24 @@ namespace Pico.Platform
         public static __IntPtr ppf_Message_GetOrgScopedID(__IntPtr obj)
         {
             var __ret = __Internal.ppf_Message_GetOrgScopedID(obj);
+            return __ret;
+        }
+
+        public static __IntPtr ppf_Message_GetCaptureInfo(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_Message_GetCaptureInfo(obj);
+            return __ret;
+        }
+
+        public static __IntPtr ppf_Message_GetRecordInfo(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_Message_GetRecordInfo(obj);
+            return __ret;
+        }
+
+        public static __IntPtr ppf_Message_GetSessionMedia(__IntPtr obj)
+        {
+            var __ret = __Internal.ppf_Message_GetSessionMedia(obj);
             return __ret;
         }
     }
@@ -7116,6 +7427,75 @@ namespace Pico.Platform
         public static ulong ppf_Compliance_DetectSensitive(global::Pico.Platform.DetectSensitiveScene scene, string content)
         {
             var __ret = __Internal.ppf_Compliance_DetectSensitive(scene, content);
+            return __ret;
+        }
+    }
+
+    public partial class CLIB
+    {
+        public partial struct __Internal
+        {
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Highlight_CaptureScreen", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern ulong ppf_Highlight_CaptureScreen();
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Highlight_ListMedia", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern ulong ppf_Highlight_ListMedia([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Pico.Platform.UTF8Marshaller))] string sessionId);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Highlight_SaveMedia", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern ulong ppf_Highlight_SaveMedia([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Pico.Platform.UTF8Marshaller))] string jobId, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Pico.Platform.UTF8Marshaller))] string sessionId);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Highlight_ShareMedia", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern ulong ppf_Highlight_ShareMedia([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Pico.Platform.UTF8Marshaller))] string jobId, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Pico.Platform.UTF8Marshaller))] string sessionId);
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Highlight_StartRecord", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern ulong ppf_Highlight_StartRecord();
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Highlight_StartSession", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern ulong ppf_Highlight_StartSession();
+
+            [DllImport("pxrplatformloader", EntryPoint = "ppf_Highlight_StopRecord", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern ulong ppf_Highlight_StopRecord();
+        }
+
+        public static ulong ppf_Highlight_CaptureScreen()
+        {
+            var __ret = __Internal.ppf_Highlight_CaptureScreen();
+            return __ret;
+        }
+
+        public static ulong ppf_Highlight_ListMedia(string sessionId)
+        {
+            var __ret = __Internal.ppf_Highlight_ListMedia(sessionId);
+            return __ret;
+        }
+
+        public static ulong ppf_Highlight_SaveMedia(string jobId, string sessionId)
+        {
+            var __ret = __Internal.ppf_Highlight_SaveMedia(jobId, sessionId);
+            return __ret;
+        }
+
+        public static ulong ppf_Highlight_ShareMedia(string jobId, string sessionId)
+        {
+            var __ret = __Internal.ppf_Highlight_ShareMedia(jobId, sessionId);
+            return __ret;
+        }
+
+        public static ulong ppf_Highlight_StartRecord()
+        {
+            var __ret = __Internal.ppf_Highlight_StartRecord();
+            return __ret;
+        }
+
+        public static ulong ppf_Highlight_StartSession()
+        {
+            var __ret = __Internal.ppf_Highlight_StartSession();
+            return __ret;
+        }
+
+        public static ulong ppf_Highlight_StopRecord()
+        {
+            var __ret = __Internal.ppf_Highlight_StopRecord();
             return __ret;
         }
     }
@@ -8288,6 +8668,15 @@ namespace Pico.Platform
         Female = 2
     }
 
+    public enum AsrEngineInitResult
+    {
+        Unknown = -999,
+        Arch32BitNotSupported = -3,
+        InvalidConfig = -2,
+        AlreadyInitialized = -1,
+        Success = 0
+    }
+
     /// <summary>The download progress of the DLC file.</summary>
     public enum AssetFileDownloadCompleteStatus
     {
@@ -8750,7 +9139,17 @@ namespace Pico.Platform
         AssetFile_GetNextAssetDetailsArrayPage = 13010,
         Notification_AssetFile_DownloadUpdate = 13101,
         Notification_AssetFile_DeleteForSafety = 13102,
-        Compliance_DetectSensitive = 15015
+        Notification_Speech_OnAsrResult = 14001,
+        Notification_Speech_OnSpeechError = 14002,
+        Compliance_DetectSensitive = 15015,
+        Highlight_StartSession = 15110,
+        Highlight_CaptureScreen = 15111,
+        Highlight_StartRecord = 15112,
+        Highlight_StopRecord = 15113,
+        Highlight_ListMedia = 15114,
+        Highlight_SaveMedia = 15115,
+        Highlight_ShareMedia = 15116,
+        Notification_Highlight_OnRecordStop = 15150
     }
 
     /// <summary>Whether it is the first time that the user has joined the room or if the user is reconnected to the room.</summary>

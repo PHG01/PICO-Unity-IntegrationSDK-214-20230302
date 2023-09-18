@@ -19,6 +19,741 @@ using UnityEngine;
 
 namespace Unity.XR.PXR
 {
+    //MR
+    #region MR
+
+    #region new mr
+    public struct PxrAnchorEntityCreateInfo
+    {
+        public PxrTrackingOrigin origin;
+        public PxrPosef pose;
+        public double time;
+    }
+
+    public struct PxrAnchorEntityDestroyInfo
+    {
+        public ulong anchorHandle;
+    }
+
+    public struct PxrUuid
+    {
+        public ulong value0;
+        public ulong value1;
+    }
+
+    public struct PxrAnchorComponentSceneLabelInfo
+    {
+        public PxrStructureType type;
+        public PxrSceneLabel label;
+    }
+
+    public struct PxrAnchorComponentPlaneInfo
+    {
+        public PxrStructureType type;
+        public PxrVector3f center;
+        public PxrExtent2Df extent;
+        public uint polygonSize;
+        public IntPtr polygonVertices; //=>PxrVector3f[]
+    }
+
+    public struct PxrAnchorComponentVolumeInfo
+    {
+        public PxrStructureType type;
+        public PxrVector3f center;
+        public PxrVector3f extent;
+    }
+
+    public struct PxrExtent2Df
+    {
+        public float width;
+        public float height;
+    }
+
+    public struct PxrAnchorPlaneBoundaryInfo
+    {
+        public PxrVector3f center;
+        public PxrExtent2Df extent;
+    }
+
+    public struct PxrAnchorPlanePolygonInfo
+    {
+        public uint inputCount;
+        public uint outputCount;
+        public IntPtr vertices;
+    }
+
+    public struct PxrAnchorVolumeInfo
+    {
+        public PxrVector3f center;
+        public PxrVector3f extent;
+    }
+
+    public struct PxrAnchorEntityList
+    {
+        public uint count;
+        public IntPtr anchorHandles;//=>ulong[]
+    }
+
+    public struct PxrAnchorEntityPersistInfo
+    {
+        public PxrAnchorEntityList anchorList;
+        public PxrPersistLocation location;
+    }
+
+    /// <summary>
+    /// Information about the event of creating an anchor entity.
+    /// </summary>
+    public struct PxrEventAnchorEntityCreated
+    {
+        /// <summary>
+        /// Task ID.
+        /// </summary>
+        public ulong taskId;
+        /// <summary>
+        /// Task result, which indicates whether the anchor entity is successfully created.
+        /// </summary>
+        public PxrResult result;
+        /// <summary>
+        /// The handle of the anchor entity.
+        /// </summary>
+        public ulong anchorHandle;
+        /// <summary>
+        /// The UUID of the anchor entity.
+        /// </summary>
+        public Guid uuid;
+    }
+
+    /// <summary>
+    /// Information about the event of persisting an anchor entity.
+    /// </summary>
+    public struct PxrEventAnchorEntityPersisted
+    {
+        /// <summary>
+        /// Task ID.
+        /// </summary>
+        public ulong taskId;
+        /// <summary>
+        /// Task result, which indicates whether the anchor entity is successfully persisted.
+        /// </summary>
+        public PxrResult result;
+        /// <summary>
+        /// The location where the anchor entity is saved. Currently, the anchor entity can only be saved to the device's local storage.
+        /// </summary>
+        public PxrPersistLocation location;
+    }
+
+    public struct PxrAnchorEntityUnPersistInfo
+    {
+        public PxrAnchorEntityList anchorList;
+        public PxrPersistLocation location;
+    }
+
+    /// <summary>
+    /// Information about the event of unpersisting an anchor entity.
+    /// </summary>
+    public struct PxrEventAnchorEntityUnPersisted
+    {
+        /// <summary>
+        /// Task ID.
+        /// </summary>
+        public ulong taskId;
+        /// <summary>
+        /// Task result, which indicates whether the anchor entity is successfully unpersisted.
+        /// </summary>
+        public PxrResult result;
+        /// <summary>
+        /// The location from which the anchor entity is unpersisted. Currently, the anchor entity can only be unpersisted from the device's local storage.
+        /// </summary>
+        public PxrPersistLocation location;
+    }
+
+    public struct PxrAnchorEntityClearInfo
+    {
+        public PxrPersistLocation location;
+    }
+
+    /// <summary>
+    /// Information about the event of clearing all anchor entities.
+    /// </summary>
+    public struct PxrEventAnchorEntityCleared
+    {
+        /// <summary>
+        /// Task ID.
+        /// </summary>
+        public ulong taskId;
+        /// <summary>
+        /// Task result, which indicates whether the anchor entities are successfully cleared.
+        /// </summary>
+        public PxrResult result;
+        /// <summary>
+        /// The location of the anchor entities cleared.
+        /// </summary>
+        public PxrPersistLocation location;
+    }
+
+    public struct PxrAnchorEntityLoadInfo
+    {
+        public uint maxResult;
+        public ulong timeout;
+        public PxrPersistLocation location;
+        public IntPtr include; //=>PxrAnchorEntityLoadFilterBaseHeader
+        public IntPtr exclude; //=>PxrAnchorEntityLoadFilterBaseHeader
+    }
+
+    public struct PxrAnchorEntityLoadUuidFilter
+    {
+        public PxrStructureType type;
+        public uint uuidCount;
+        public IntPtr uuidList; //=>PxrUuid[]
+    }
+
+    public struct PxrAnchorEntityLoadComponentFilter
+    {
+        public PxrStructureType type;
+        public ulong typeFlags;
+    }
+    public struct PxrAnchorEntityLoadSpatialSceneFilter
+    {
+        public PxrStructureType type;
+        public ulong typeFlags;
+    }
+
+    public struct PxrAnchorEntityLoadResult
+    {
+        public ulong anchor;
+        public PxrUuid uuid;
+    }
+
+    public struct PxrAnchorEntityLoadResults
+    {
+        public uint inputCount;
+        public uint outputCount;
+        public IntPtr loadResults; //=>PxrAnchorEntityLoadResult[]
+    }
+
+    /// <summary>
+    /// Information about the event of loading anchor entities.
+    /// </summary>
+    public struct PxrEventAnchorEntityLoaded
+    {
+        /// <summary>
+        /// Task ID.
+        /// </summary>
+        public ulong taskId;
+        /// <summary>
+        /// Task result, which indicates whether the anchor entities are successfully loaded.
+        /// </summary>
+        public PxrResult result;
+        /// <summary>
+        /// The number of anchor entities loaded.
+        /// </summary>
+        public uint count;
+        /// <summary>
+        /// The location from which the anchor entities are loaded.
+        /// </summary>
+        public PxrPersistLocation location;
+    }
+
+    /// <summary>
+    /// Information about the event of room calibration.
+    /// </summary>
+    public struct PxrEventSpatialSceneCaptured
+    {
+        /// <summary>
+        /// Task ID.
+        /// </summary>
+        public ulong taskId;
+        /// <summary>
+        /// Task result, which indicate whether the room is successfully calibrated.
+        /// </summary>
+        public PxrResult result;
+        /// <summary>
+        /// (not defined)
+        /// </summary>
+        public PxrSpatialSceneCaptureStatus status;
+    }
+
+    public struct PxrEventSpatialTrackingStateUpdate
+    {
+        public PxrSpatialTrackingState state;
+        public PxrSpatialTrackingStateMessage message;
+    }
+
+    public enum PxrSpatialSceneCaptureStatus
+    {
+        NotDefined = 0,
+    }
+
+    /// <summary>
+    /// The flags of components.
+    /// </summary>
+    public enum PxrAnchorComponentTypeFlags
+    {
+        Pose = 0x00000001,
+        Persistence = 0x00000002,
+        SceneLabel = 0x00000004,
+        Plane = 0x00000008,
+        Volume = 0x00000010
+    }
+
+    public enum PxrSpatialSceneDataTypeFlags
+    {
+        Unknown = 0x00000001,
+        Floor = 0x00000002,
+        Ceiling = 0x00000004,
+        Wall = 0x00000008,
+        Door = 0x00000010,
+        Window = 0x00000020,
+        Opening = 0x00000040,
+        Object = 0x00000080
+    }
+
+    public enum PxrTrackingOrigin
+    {
+        Eye = 0,
+        Floor = 1,
+        Stage = 2
+    }
+
+    public enum PxrAnchorComponentType
+    {
+        Pose = 0,
+        Persistence = 1,
+        SceneLabel = 2,
+        Plane = 3,
+        Volume = 4,
+    }
+
+    public enum PxrSceneLabel
+    {
+        UnKnown = 0,
+        Floor,
+        Ceiling,
+        Wall,
+        Door,
+        Window,
+        Opening,
+        Table,
+        Sofa,
+    }
+
+    /// <summary>
+    /// The location that an anchor entity is saved to.
+    /// </summary>
+    public enum PxrPersistLocation
+    {
+        /// <summary>
+        /// The device's local storage.
+        /// </summary>
+        Local = 1,
+        /// <summary>
+        /// (Not supported yet)
+        /// </summary>
+        Remote = 2,
+    }
+    #endregion
+
+    //deprecate
+    // Spatial Instance uuid 128 bit
+    public struct PxrSpatialInstanceUuid
+    {
+        public UInt64 value0;
+        public UInt64 value1;
+    }
+
+    // Create info struct used when creating a spatial anchor
+    public struct PxrSpatialAnchorCreateInfo
+    {
+        public PxrReferenceType referenceType; // Global or Local
+        public PxrPosef pose;                  // Position and Rotation
+        public double time;                  // timestamp in milliseconds
+    }
+
+    // Save info struct used when saving a spatial anchor
+    public struct PxrSpatialAnchorSaveInfo
+    {
+        public UInt64 anchorHandle;
+        public PxrSpatialPersistenceLocation location;
+        public PxrSpatialPersistenceMode persistenceMode;
+    }
+
+    // Delete info struct used when deleting a spatial anchor
+    public struct PxrSpatialAnchorDeleteInfo
+    {
+        public UInt64 anchorHandle;
+        public PxrSpatialPersistenceLocation persistenceLocation;
+    }
+
+    // Used to load all spatial instances that match the uuids provided
+    // in the filter info. If numIds is set to 0, all Ids will be loaded.
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PxrSpatialInstanceIdFilter
+    {
+        public UInt32 numIds;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+        public PxrSpatialInstanceUuid[] uuids; 
+    }
+
+    // Load info strut used when loading spatial instances
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PxrSpatialInstanceLoadByIdInfo
+    {
+        public UInt32 maxNum;                                   // Max num of handles can be returned by this query
+        public double timeout;                                  // milliseconds
+        public PxrSpatialPersistenceLocation persistenceLocation; // Where to load
+        public PxrSpatialInstanceIdFilter idFilter;        // What to load  
+    }
+
+    public enum PxrSpatialTrackingState
+    {
+        Invalid = 0,
+        Valid = 1,
+        Limited = 2,
+    }
+
+    public enum PxrSpatialTrackingStateMessage
+    {
+        Unknown = 0,
+        Error = 1,
+
+        Locating = 100,
+        Located = 101,
+        LocatingFailed = 102,
+        LocatingFailedInvalidMap = 103,
+        LocatingFailedNoMap = 104,
+        LocateStopping = 105,
+        LocateStopFailed = 106,
+        LocateStopped = 107,
+        MapCreating = 108,
+        MapCreateFailed = 109,
+        MapCreated = 110,
+        MapSaving = 111,
+        MapSaveFailed = 112,
+        MapSaveFailedLowQuality = 113,
+        MapSaveFailedInsufficentDiskSpace = 114,
+        MapSaved = 115,
+        MrEngineStarted = 116,
+        MrEngineStopped = 117,
+        MrEngineDestroyed = 118,
+        MrMapLoss = 119,
+    }
+
+    public struct PxrSpatialTrackingStateInfo
+    {
+        public PxrSpatialTrackingState state;
+        public PxrSpatialTrackingStateMessage message;
+    }
+
+    public struct PxrEventSpatialTrackingStateInfo
+    {
+        public PxrStructureType type;
+        public PxrEventLevel eventLevel;
+        public PxrSpatialTrackingStateInfo stateInfo;
+    }
+
+    public struct PxrEventSpatialAnchorSaveResult
+    {
+        public PxrStructureType type;
+        public PxrEventLevel eventLevel;
+        public PxrSpatialPersistenceResult result;
+        public UInt64 asyncRequestId;
+        public PxrSpatialInstanceUuid uuid;
+        public UInt64 handle;
+        public PxrSpatialPersistenceLocation location;
+    }
+
+    public struct PxrEventSpatialAnchorDeleteResult
+    {
+        public PxrStructureType type;
+        public PxrEventLevel eventLevel;
+        public PxrSpatialPersistenceResult result;
+        public UInt64 asyncRequestId;
+        public PxrSpatialInstanceUuid uuid;
+        public PxrSpatialPersistenceLocation location;
+    }
+
+    public struct PxrSpatialAnchorLoadResult
+    {
+        public UInt64 anchorHandle;
+        public PxrSpatialInstanceUuid uuid;
+    }
+
+    public struct PxrEventSpatialAnchorLoadResults
+    {
+        public PxrStructureType type;
+        public PxrEventLevel eventLevel;
+        public PxrSpatialPersistenceResult result;
+        public bool hasNext;
+        public UInt64 asyncRequestId;
+        public UInt32 numResults;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
+        public PxrSpatialAnchorLoadResult[] loadResults;
+    }
+
+    public struct PxrSpatialAnchorLoadResults
+    {
+        public Int32 resultCapacityInput;
+        public Int32 resultCountOutput;
+        public IntPtr results;  //PxrSpatialAnchorLoadResult
+    }
+
+    public struct PxrEventSpatialAnchorLoadResultsAvailable
+    {
+        public PxrStructureType type;
+        public PxrEventLevel eventLevel;
+        public UInt64 asyncRequestId;
+    }
+
+    public struct PxrEventSpatialAnchorLoadResultsComplete
+    {
+        public PxrStructureType type;
+        public PxrEventLevel eventLevel;
+        public UInt64 asyncRequestId;
+        public PxrSpatialPersistenceResult result;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PxrEventDataBuffer
+    {
+        public PxrStructureType type;
+        public PxrEventLevel eventLevel;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 500)]
+        public byte[] data;
+    };
+
+    public struct PxrRoomSceneDataSaveInfo
+    {
+        public ulong roomSceneDataHandle;
+        public PxrSpatialPersistenceLocation location;
+    }
+
+    public struct PxrRoomSceneDataDeleteInfo
+    {
+        public ulong roomSceneDataHandle;
+        public PxrSpatialPersistenceLocation location;
+    }
+
+    public struct PxrEventRoomSceneDataSaveResult
+    {
+        public PxrStructureType type;
+        public PxrEventLevel eventLevel;
+        public PxrSpatialPersistenceResult result;
+        public ulong asyncRequestId;
+        public ulong handle;
+        public PxrSpatialPersistenceLocation location;
+    }
+
+    public struct PxrEventRoomSceneDataDeleteResult
+    {
+        public PxrStructureType type;
+        public PxrEventLevel eventLevel;
+        public PxrSpatialPersistenceResult result;
+        public ulong asyncRequestId;
+        public ulong handle;
+        public PxrSpatialPersistenceLocation location;
+    }
+
+    public struct PxrRoomSceneLoadInfo
+    {
+        public double timeoutMs;                           // time in milliseconds
+        public PxrSpatialPersistenceLocation location;
+    }
+
+    public struct PxrRoomSceneLoadResult
+    {
+        public ulong anchorHandle;
+        public PxrSpatialInstanceUuid anchorUuid;
+        public ulong roomSceneDataHandle;
+        public int dataLen;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+        public byte[] data;
+    }
+
+    public struct PxrEventRoomSceneLoadResultsComplete
+    {
+        public PxrStructureType type;
+        public PxrEventLevel eventLevel;
+        public ulong asyncRequestId;
+        public PxrSpatialPersistenceResult result;
+    }
+
+    public struct PxrRoomSceneLoadResults
+    {
+        public int resultCapacityInput;
+        public int resultCountOutput;
+        public IntPtr results; //PxrRoomSceneLoadResult
+    }
+
+    public struct PxrEventRoomSceneDataUpdateResult
+    {
+        public PxrStructureType type;
+        public PxrEventLevel level;
+        public PxrSpatialInstanceUuid anchorUuid;
+        public ulong roomSceneDataHandle;
+        public uint result;
+        public uint dataLength;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
+        public byte[] roomSceneData;
+    }
+
+    public struct PxrEventSemiAutoCandidatesUpdate
+    {
+        public uint state;
+        public uint count;
+    }
+
+    public struct PxrSemiAutoRoomCaptureCandidatesUpdate
+    {
+        public PxrStructureType type;
+        public PxrEventLevel eventLevel;
+        public PxrSpatialPersistenceResult result;
+    }
+
+    public struct PxrPoint3D
+    {
+        public float x;
+        public float y;
+        public float z;
+    }
+
+    public struct PxrEventDataSeethroughStateChanged
+    {
+        public PxrStructureType type;
+        public PxrEventLevel eventLevel;
+        public int state;
+    };
+
+
+
+    public enum PxrStructureType
+    {
+        Unknown = 0,
+        PXR_TYPE_EVENT_DATA_SEETHROUGH_STATE_CHANGED = 9,
+
+        SpatialAnchorSaveResult = 20,
+        SpatialAnchorDeleteResult = 21,
+        SpatialAnchorLoadResults = 22,
+        NewSpaceReady = 28,
+        SpatialAnchorLoadResultsAvailable = 29,
+        SpatialAnchorLoadResultsComplete = 30,
+        RoomSceneDataSaveResult = 31,
+        RoomSceneDataDeleteResult = 32,
+        RoomSceneLoadResultsComplete = 33,
+        SemiAutoRoomCaptureCandidatesUpdate = 36,
+        RoomSceneDataUpdateResult = 37,
+        TrackingStateChanged = 40,
+        //mrsdk2.0
+        MRMin = 100,
+        SpatialTrackingStateUpdate = 101,
+        AnchorEntityProperties = 102,
+        AnchorEntityCreateInfo = 103,
+        AnchorEntityDestroyInfo = 104,
+        AnchorSpaceCreateInfo = 105,
+        AnchorComponentSceneLabelInfo = 106,
+        AnchorComponentPlaneInfo = 107,
+        AnchorComponentVolumeInfo = 108,
+        AnchorComponentAddInfo = 109,
+        AnchorComponentRemoveInfo = 110,
+        AnchorPlaneBoundaryInfo = 111,
+        AnchorPlanePolygonInfo = 112,
+        AnchorVolumeInfo = 113,
+        AnchorEntityPersistInfo = 114,
+        AnchorEntityUnPersistInfo = 115,
+        AnchorEntityList = 116,
+        AnchorEntityClearInfo = 117,
+        AnchorEntityPersisted = 118,
+        AnchorEntityUnPersisted = 119,
+        AnchorEntityCleared = 120,
+        AnchorEntityLoadInfo = 121,
+        AnchorEntityLoadUuidFilter = 122,
+        AnchorEntityLoadComponentFilter = 123,
+        AnchorEntityLoaded = 124,
+        AnchorEntityLoadResult = 125,
+        SpatialSceneCaptureStartInfo = 126,
+        SpatialSceneCaptured = 127,
+        AnchorEntityLoadSpatialSceneFilter = 128,
+        SemiAutoCandidatesUpdate = 129,
+        AnchorEntityCreated = 130,
+        MRMax = 200
+    }
+
+    
+    /// <summary>
+    /// The result of mixed reality-realted events.
+    /// </summary>
+    public enum PxrResult
+    {
+        SUCCESS = 0,
+        TIMEOUT_EXPIRED = 1,
+        SESSION_LOSS_PENDING = 3,
+        EVENT_UNAVAILABLE = 4,
+        SPACE_BOUNDS_UNAVAILABLE = 7,
+        SESSION_NOT_FOCUSED = 8,
+        FRAME_DISCARDED = 9,
+        ERROR_VALIDATION_FAILURE = -1,
+        ERROR_RUNTIME_FAILURE = -2,
+        ERROR_OUT_OF_MEMORY = -3,
+        ERROR_API_VERSION_UNSUPPORTED = -4,
+        ERROR_INITIALIZATION_FAILED = -6,
+        ERROR_FUNCTION_UNSUPPORTED = -7,
+        ERROR_FEATURE_UNSUPPORTED = -8,
+        ERROR_EXTENSION_NOT_PRESENT = -9,
+        ERROR_LIMIT_REACHED = -10,
+        ERROR_SIZE_INSUFFICIENT = -11,
+        ERROR_HANDLE_INVALID = -12,
+
+        ERROR_SPATIAL_LOCALIZATION_RUNNING = -1000,
+        ERROR_SPATIAL_LOCALIZATION_NOT_RUNNING = -1001,
+        ERROR_SPATIAL_MAP_CREATED = -1002,
+        ERROR_SPATIAL_MAP_NOT_CREATED = -1003,
+        ERROR_COMPONENT_NOT_SUPPORTED = -501,
+        ERROR_COMPONENT_CONFLICT = -502,
+        ERROR_COMPONENT_NOT_ADDED = -503,
+        ERROR_COMPONENT_ADDED = -504,
+        ERROR_ANCHOR_ENTITY_NOT_FOUND = -505
+    }
+
+    public enum PxrEventLevel
+    {
+        Low = 0,
+        Mid,
+        High
+    }
+    
+    // The reference frame in which the pose is calculated,
+    // Currently Local and Global are supported.
+    public enum PxrReferenceType
+    {
+        NotDefined = 0,
+        Local = 1,
+        Global = 2
+    }
+
+    // Storage location to be used to store, load, erase, and query spatial instances from
+    public enum PxrSpatialPersistenceLocation
+    {
+        NotDefined = 0,
+        Local = 1, // local device storage
+        Remote = 2, // remote storage
+    }
+
+    // Persistence mode, only one mode is supported and may be more mode in future.
+    public enum PxrSpatialPersistenceMode
+    {
+        NotDefined = 0,
+        Default = 1, // only this mode is supported now.
+    }
+
+    public enum PxrSpatialPersistenceResult
+    {
+        ErrorRuntimeFailure = -2,
+        ErrorValidationFailure = -1,
+        Success = 0,
+        TimeoutExpired = 1,
+    }
+
+    #endregion
+
     [StructLayout(LayoutKind.Sequential)]
     public struct UserDefinedSettings
     {
@@ -29,6 +764,8 @@ namespace Unity.XR.PXR
         public ushort optimizeBufferDiscards;
         public ushort enableAppSpaceWarp;
         public ushort enableSubsampled;
+        public ushort lateLatchingDebug;
+        public ushort enableStageMode;
     }
 
     public enum RenderEvent
@@ -109,6 +846,12 @@ namespace Unity.XR.PXR
         SetFilterType,
         SetSubmitLayerEXTItemColorMatrix,
     };
+
+    public enum FoveatedRenderingMode
+    {
+        FixedFoveatedRendering = 0,
+        EyeTrackedFoveatedRendering = 1
+    }
 
     public enum FoveationLevel
     {
@@ -213,6 +956,11 @@ namespace Unity.XR.PXR
         PXR_GET_FACELIP_DATA = 5,
     }
 
+    /// <summary>
+    /// Body joint enumerations.
+    /// * For leg tracking mode, joints numbered from 0 to 15 return data.
+    /// * For full body tracking mode, all joints return data.
+    /// </summary>
     public enum BodyTrackerRole
     {
         Pelvis = 0,
@@ -252,50 +1000,188 @@ namespace Unity.XR.PXR
         PxrKeepStatic = 0x00000002,
     }
 
+    /// <summary>
+    /// Contains data about the position and rotation of a body joint.
+    /// </summary>
     public struct BodyTrackerTransPose
     {
-        public Int64 TimeStamp;                // time stamp of imu
-        public double PosX;                     // position of x
-        public double PosY;                     // position of y
-        public double PosZ;                     // position of z
-        public double RotQx;                    // x components of Quaternion
-        public double RotQy;                    // y components of Quaternion
-        public double RotQz;                    // z components of Quaternion
-        public double RotQw;                    // w components of Quaternion
+        /// <summary>
+        /// IMU timestamp.
+        /// </summary>
+        public Int64 TimeStamp;
+        /// <summary>
+        /// The joint's position on the X axis.
+        /// </summary>
+        public double PosX;
+        /// <summary>
+        /// The joint's position on the Y axis.
+        /// </summary>
+        public double PosY;
+        /// <summary>
+        /// The joint's position on the Z axis.
+        /// </summary>
+        public double PosZ;
+        /// <summary>
+        /// The joint's rotation on the X component of the Quaternion.
+        /// </summary>
+        public double RotQx;
+        /// <summary>
+        /// The joint's rotation on the Y component of the Quaternion.
+        /// </summary>
+        public double RotQy;
+        /// <summary>
+        /// The joint's rotation on the Z component of the Quaternion.
+        /// </summary>
+        public double RotQz;
+        /// <summary>
+        /// The joint's rotation on the W component of the Quaternion.
+        /// </summary>
+        public double RotQw;
     }
 
 
+    /// <summary>
+    /// Contains data about the position, velocity, acceleration, and action of a body joint.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct BodyTrackerTransform
     {
-        public BodyTrackerRole bone;                // bone name. if bone == NONE_ROLE, this bone is not calculated
+        /// <summary>
+        /// Body joint name. If the value is `NONE_ROLE`, the joint's data will not be calculated.
+        /// </summary>
+        public BodyTrackerRole bone;
+        /// <summary>
+        /// The joint's position in the scene. Use `localpose` for your app.
+        /// </summary>
         public BodyTrackerTransPose localpose;
+        /// <summary>
+        /// (do not use `globalpose`)
+        /// </summary>
         public BodyTrackerTransPose globalpose;
+        /// <summary>
+        /// The joint's velocity on the X, Y, and Z axes.
+        /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public double[] velo;                     // velocity of x,y,z
+        public double[] velo;
+        /// <summary>
+        /// The joint's acceleration on the X, Y, and Z axes.
+        /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public double[] acce;                     // acceleration of x,y,z
+        public double[] acce;
+        /// <summary>
+        /// The joint's angular velocity on the X, Y, and Z axes.
+        /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public double[] wvelo;                    // angular velocity of x,y,z
+        public double[] wvelo;
+        /// <summary>
+        /// The joint's angular acceleration on the X, Y, and Z axes.
+        /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public double[] wacce;                    // angular acceleration of x,y,z
-        public UInt32 Action;              // multiple actions can be supported at the same time by means of OR
+        public double[] wacce;
+        /// <summary>
+        /// Multiple actions can be supported at the same time by means of OR
+        /// </summary>
+        public UInt32 Action;
     }
 
+    /// <summary>
+    /// Contains data about the position, velocity, acceleration, and action of each body joint.
+    /// </summary>
     public struct BodyTrackerResult
     {
+        /// <summary>
+        /// A fixed-length array, each position transmits the data of one body joint.
+        /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 24)]
         public BodyTrackerTransform[] trackingdata;
     }
 
 
+    /// <summary>
+    /// Information about PICO Motion Tracker's connection state.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct PxrFitnessBandConnectState
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Byte num;
+        /// <summary>
+        /// 
+        /// </summary>
         public fixed Byte trackerID[12];
     }
 
+    public enum BodyTrackingAlgParamType
+    {
+        HUMAN_HEIGHT = 0,
+        SWIFT_MODE = 1,
+        BONE_PARAM = 2
+    }
+    public struct BodyTrackingAlgParam
+    {
+        public int BodyJointSet;
+        public BodyTrackingBoneLength BoneLength;
+    }
+
+    /// <summary>
+    /// The struct that defines the lengths (in centimeters) of different body parts of the avatar.
+    /// </summary>
+    public struct BodyTrackingBoneLength
+    {
+        /// <summary>
+        /// The length of the head, which is from the top of the head to the upper area of the neck.
+        /// </summary>
+        public float headLen;
+        /// <summary>
+        /// The length of the neck, which is from the upper area of the neck to the lower area of the neck.
+        /// </summary>
+        public float neckLen;
+        /// <summary>
+        /// The length of the torso, which is from the lower area of the neck to the navel.
+        /// </summary>
+        public float torsoLen;
+        /// <summary>
+        /// The length of the hip, which is from the navel to the center of the upper area of the upper leg.
+        /// </summary>
+        public float hipLen;
+        /// <summary>
+        /// The length of the upper leg, which from the hip to the knee-joint.
+        /// </summary>
+        public float upperLegLen;
+        /// <summary>
+        /// The length of the lower leg, which is from the knee-joint to the ankle.
+        /// </summary>
+        public float lowerLegLen;
+        /// <summary>
+        /// The length of the foot, which is from the ankle to the tiptoe.
+        /// </summary>
+        public float footLen;
+        /// <summary>
+        /// The length of the shoulder, which is between the left and right shoulder joints.
+        /// </summary>
+        public float shoulderLen;
+        /// <summary>
+        /// The length of the upper arm, which is from the sholder joint to the elbow joint.
+        /// </summary>
+        public float upperArmLen;
+        /// <summary>
+        /// The length of the lower arm, which is from the elbow joint to the wrist.
+        /// </summary>
+        public float lowerArmLen;
+        /// <summary>
+        /// The length of the hand, which is from the wrist to the finger tip.
+        /// </summary>
+        public float handLen;
+    }
+
+    public enum AdaptiveResolutionPowerSetting
+    {
+        HIGH_QUALITY, // performance factor = 0.9
+        BALANCED, // performance factor = 0.8
+        BATTERY_SAVING // performance factor = 0.7
+    }
 
     public struct FoveationParams
     {
@@ -724,15 +1610,115 @@ namespace Unity.XR.PXR
         public fixed float reserved[128];
     };
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PxrExtent2Di
+    {
+        public int width;
+        public int height;
+    };
 
     public static class PXR_Plugin
     {
-        private const string PXR_SDK_Version = "2.2.3";
+        private const string PXR_SDK_Version = "2.3.2";
         private const string PXR_PLATFORM_DLL = "PxrPlatform";
         public const string PXR_API_DLL = "pxr_api";
         private static int PXR_API_Version = 0;
 
         #region DLLImports
+        //MR
+        //new
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_CreateAnchorEntity(ref PxrAnchorEntityCreateInfo info, out ulong anchorHandle);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_DestroyAnchorEntity(ref PxrAnchorEntityDestroyInfo info);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_GetAnchorPose(ulong anchorHandle, PxrTrackingOrigin origin, out PxrPosef pose);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_GetAnchorEntityUuid(ulong anchorHandle, out PxrUuid uuid);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_GetAnchorComponentFlags(ulong anchorHandle,
+            out ulong flag);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_GetAnchorSceneLabel(ulong anchorHandle, out PxrSceneLabel label);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_GetAnchorPlaneBoundaryInfo(ulong anchorHandle,
+            ref PxrAnchorPlaneBoundaryInfo info);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_GetAnchorPlanePolygonInfo(ulong anchorHandle,
+            ref PxrAnchorPlanePolygonInfo info);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_GetAnchorBoxInfo(ulong anchorHandle, ref PxrAnchorVolumeInfo info);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_PersistAnchorEntity(ref PxrAnchorEntityPersistInfo info,
+            out ulong taskId);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_UnpersistAnchorEntity(ref PxrAnchorEntityUnPersistInfo info,
+            out ulong taskId);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_ClearPersistedAnchorEntity(ref PxrAnchorEntityClearInfo info,
+            out ulong taskId);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_LoadAnchorEntity(ref PxrAnchorEntityLoadInfo info, out ulong taskId);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_GetAnchorEntityLoadResults(ulong taskId, ref PxrAnchorEntityLoadResults results);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PxrResult Pxr_StartSpatialSceneCapture(out ulong taskId);
+
+        //old
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_StartHumanOcclusion();
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_AcquireMeshingInfo(IntPtr maskBuffer,IntPtr verticesBuffer, out uint verticesSize, IntPtr facetsBuffer, out uint facetSize, out bool haveRead);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_StopHumanOcclusion();
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_CreateSpatialAnchor(ref PxrSpatialAnchorCreateInfo info, ref UInt64 handle);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_DestroySpatialAnchor(UInt64 handle);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_SaveSpatialAnchor(ref PxrSpatialAnchorSaveInfo info, ref UInt64 requestId);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_DeleteSpatialAnchor(ref PxrSpatialAnchorDeleteInfo info, ref UInt64 requestId);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_LoadSpatialAnchorById(ref PxrSpatialInstanceLoadByIdInfo info, ref UInt64 requestId);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_GetSpatialAnchorLoadResults(UInt64 requestId,ref PxrSpatialAnchorLoadResults loadResults);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_GetSpatialAnchorPose(UInt64 handle, double predictDisplayTime, PxrReferenceType type, ref PxrPosef pose);
+        [DllImport(PXR_PLATFORM_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_GetSpatialAnchorUuid(UInt64 handle, ref PxrSpatialInstanceUuid uuid);
+        [DllImport(PXR_PLATFORM_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool Pxr_PollEventFromXRPlugin(ref int eventNum, IntPtr[] eventData);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_CreateRoomSceneData(PxrSpatialInstanceUuid anchorUuid, IntPtr roomSceneData, int dataLen, ref ulong roomSceneDataHandle);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_DestroyRoomSceneData(ulong roomSceneDataHandle);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_SaveRoomSceneData(ref PxrRoomSceneDataSaveInfo saveInfo, ref ulong requestId);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_DeleteRoomSceneData(ref PxrRoomSceneDataDeleteInfo deleteInfo, ref ulong requestId);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_LoadRoomScene(ref PxrRoomSceneLoadInfo loadInfo, ref ulong requestId);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_GetRoomSceneLoadResults(ulong requestId, ref PxrRoomSceneLoadResults results);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_StartRoomCapture();
+        
         //PassThrough
         [DllImport(PXR_PLATFORM_DLL, CallingConvention = CallingConvention.Cdecl)]
         public static extern int Pxr_CameraStart();
@@ -766,6 +1752,9 @@ namespace Unity.XR.PXR
 
         [DllImport(PXR_PLATFORM_DLL, CallingConvention = CallingConvention.Cdecl)]
         public static extern void Pxr_SetFoveationLevelEnable(int enable);
+
+        [DllImport(PXR_PLATFORM_DLL, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool Pxr_SetEyeFoveationLevelEnable(int enable);
 
         [DllImport(PXR_PLATFORM_DLL, CallingConvention = CallingConvention.Cdecl)]
         public static extern void Pxr_SetFFRSubsampled(bool enable);
@@ -947,7 +1936,10 @@ namespace Unity.XR.PXR
         [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
         public static extern int Pxr_GetTrackingMode(ref UInt64 trackingModeFlags);
         [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int Pxr_SetGLTileRender(bool isTileRender);
+        
+        public static extern int Pxr_SetTrackingOrigin(PxrTrackingOrigin mode);
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int Pxr_GetTrackingOrigin(ref PxrTrackingOrigin mode);
 
         //Tracking Sensor
         [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
@@ -1168,6 +2160,12 @@ namespace Unity.XR.PXR
         [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
         public static extern int Pxr_LogSdkApi(string sdkInfo);
 
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pxr_SetBodyTrackingAlgParam(BodyTrackingAlgParamType AlgParamType, ref BodyTrackingAlgParam Param);
+
+        [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int Pxr_UpdateAdaptiveResolution(ref PxrExtent2Di dimensions, AdaptiveResolutionPowerSetting powerSetting);
+
         #endregion
 
         public static class System
@@ -1182,6 +2180,20 @@ namespace Unity.XR.PXR
             public static Action<int, int> FitnessBandNumberOfConnections;
             public static Action<int, int> FitnessBandElectricQuantity;
             public static Action<int, int> FitnessBandAbnormalCalibrationData;
+
+            public static void UPxr_SetTrackingOrigin(PxrTrackingOrigin mode)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                Pxr_SetTrackingOrigin(mode);
+#endif
+            }
+
+            public static void UPxr_GetTrackingOrigin(ref PxrTrackingOrigin mode)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                Pxr_GetTrackingOrigin(ref mode);
+#endif
+            }
 
             public static bool UPxr_LoadPICOPlugin()
             {
@@ -1199,14 +2211,6 @@ namespace Unity.XR.PXR
 #if UNITY_ANDROID && !UNITY_EDITOR
                 Pxr_UnloadPlugin();
 #endif
-            }
-
-            public static int UPxr_SetGLTileRender(bool isTileRender)
-            {
-#if UNITY_ANDROID && !UNITY_EDITOR
-                Pxr_SetGLTileRender(isTileRender);
-#endif
-                return 0;
             }
 
             public static bool UPxr_QueryDeviceAbilities(PxrDeviceAbilities abilities)
@@ -1411,6 +2415,22 @@ namespace Unity.XR.PXR
 #endif
                 PLog.d(TAG, "UPxr_SetExtraLatencyMode() result:" + result);
                 return result;
+            }
+
+            public static int UPxr_UpdateAdaptiveResolution(ref int width, AdaptiveResolutionPowerSetting powerSetting)
+            {
+                int success = 1;
+                PxrExtent2Di dim;
+
+                dim.width = width;
+                dim.height = width;
+#if !UNITY_EDITOR && UNITY_ANDROID
+
+                success = Pxr_UpdateAdaptiveResolution(ref dim, powerSetting);
+                width = dim.width;
+                PLog.i(TAG, "UPxr_UpdateAdaptiveResolution ：" + width);
+#endif
+                return success;
             }
 
             public static void UPxr_SetUserDefinedSettings(UserDefinedSettings settings)
@@ -2277,6 +3297,15 @@ namespace Unity.XR.PXR
                 Pxr_SetFoveationLevelEnable((int)level);
 #endif
             }
+            public static bool UPxr_SetEyeFoveationLevel(FoveationLevel level)
+            {
+                PLog.i(TAG, "UPxr_SetEyeFoveationLevel() level:" + level);
+                bool result = false;
+#if UNITY_ANDROID && !UNITY_EDITOR
+                result = Pxr_SetEyeFoveationLevelEnable((int)level);
+#endif
+                return result;
+            }
 
             public static void UPxr_SetFFRSubsampled(bool enable)
             {
@@ -2784,6 +3813,33 @@ namespace Unity.XR.PXR
                 return 0;
             }
 
+            public static int UPxr_SetSwiftMode(int mode)
+            {
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                BodyTrackingAlgParam pxrBodyTrackingAlgParam = new BodyTrackingAlgParam();
+                pxrBodyTrackingAlgParam.BodyJointSet = mode;
+                return Pxr_SetBodyTrackingAlgParam(BodyTrackingAlgParamType.SWIFT_MODE, ref pxrBodyTrackingAlgParam);
+#endif
+                }
+                    return 0;
+            }
+
+            public static int UPxr_SetBodyTrackingBoneLength(BodyTrackingBoneLength boneLength)
+            {
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                BodyTrackingAlgParam pxrBodyTrackingAlgParam = new BodyTrackingAlgParam();
+                pxrBodyTrackingAlgParam.BodyJointSet = 1;
+                pxrBodyTrackingAlgParam.BoneLength = boneLength;
+                return Pxr_SetBodyTrackingAlgParam(BodyTrackingAlgParamType.BONE_PARAM, ref pxrBodyTrackingAlgParam);
+#endif
+                }
+                    return 0;
+            }
+
             public static int UPxr_SetControllerVibrationEvent(UInt32 hand, int frequency, float strength, int time)
             {
                 if (PXR_Plugin.System.UPxr_GetAPIVersion() >= 0x2000305)
@@ -3200,7 +4256,6 @@ namespace Unity.XR.PXR
                 {
 #if !UNITY_EDITOR && UNITY_ANDROID
                 val = Pxr_GetHandTrackerAimState(hand,ref aimState) == 0;
-                aimState.aimRayPose.ToHandPosef(hand);
 #endif
                 }
                 return val;
@@ -3213,17 +4268,557 @@ namespace Unity.XR.PXR
                 {
 #if !UNITY_EDITOR && UNITY_ANDROID
                     val = Pxr_GetHandTrackerJointLocations(hand, ref jointLocations) == 0;
-                    for (int i = 0; i < jointLocations.jointLocations.Length; i++)
-                    {
-                        if (i == 1)
-                            jointLocations.jointLocations[i].pose.ToHandPosef(hand);
-                        else
-                            jointLocations.jointLocations[i].pose.ToJointPosef(hand);
-                    }
 #endif
                 }
                 return val;
             }
+        }
+
+        public static class MotionTracking
+        {
+            #region Eye Tracking
+
+            [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_WantEyeTrackingService();
+            [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_GetEyeTrackingSupported(ref bool supported, ref int supportedModesCount, ref EyeTrackingMode supportedModes);
+            [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_StartEyeTracking1(ref EyeTrackingStartInfo startInfo);
+            [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_StopEyeTracking1(ref EyeTrackingStopInfo stopInfo);
+            [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_GetEyeTrackingState(ref bool isTracking, ref EyeTrackingState state);
+            [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_GetEyeTrackingData1(ref EyeTrackingDataGetInfo getInfo, ref EyeTrackingData data);
+            [DllImport(PXR_PLATFORM_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_GetEyeOpenness(ref float leftEyeOpenness, ref float rightEyeOpenness);
+            [DllImport(PXR_PLATFORM_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_GetEyePupilInfo(ref EyePupilInfo eyePupilPosition);
+
+            public static int UPxr_WantEyeTrackingService()
+            {
+                int val = 0;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_WantEyeTrackingService();
+#endif
+                }
+                return val;
+            }
+
+            public static int UPxr_GetEyeTrackingSupported(ref bool supported, ref int supportedModesCount, ref EyeTrackingMode supportedModes)
+            {
+                int val = -1;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_GetEyeTrackingSupported(ref supported, ref supportedModesCount, ref supportedModes);
+#endif
+                }
+                return val;
+            }
+
+            public static int UPxr_StartEyeTracking1(ref EyeTrackingStartInfo startInfo)
+            {
+                int val = -1;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_StartEyeTracking1(ref startInfo);
+#endif
+                }
+                return val;
+            }
+
+            public static int UPxr_StopEyeTracking1(ref EyeTrackingStopInfo stopInfo)
+            {
+                int val = -1;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_StopEyeTracking1(ref stopInfo);
+#endif
+                }
+                return val;
+            }
+
+            public static int UPxr_GetEyeTrackingState(ref bool isTracking, ref EyeTrackingState state)
+            {
+                int val = -1;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_GetEyeTrackingState(ref isTracking, ref state);
+#endif
+                }
+                return val;
+            }
+
+            public static int UPxr_GetEyeTrackingData1(ref EyeTrackingDataGetInfo getInfo, ref EyeTrackingData data)
+            {
+                int val = -1;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_GetEyeTrackingData1(ref getInfo, ref data);
+#endif
+                }
+                return val;
+            }
+
+            public static int UPxr_GetEyeOpenness(ref float leftEyeOpenness, ref float rightEyeOpenness)
+            {
+                int val = 0;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_GetEyeOpenness(ref leftEyeOpenness, ref rightEyeOpenness);
+#endif
+                }
+                return val;
+            }
+
+            public static int UPxr_GetEyePupilInfo(ref EyePupilInfo eyePupilPosition)
+            {
+                int val = 0;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_GetEyePupilInfo(ref eyePupilPosition);
+#endif
+                }
+                return val;
+            }
+
+            #endregion
+
+            #region Face Tracking
+
+            [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_WantFaceTrackingService();
+            [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_GetFaceTrackingSupported(ref bool supported, ref int supportedModesCount, ref FaceTrackingSupportedMode supportedModes);
+            [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_StartFaceTracking(ref FaceTrackingStartInfo startInfo);
+            [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_StopFaceTracking(ref FaceTrackingStopInfo stopInfo);
+            [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_GetFaceTrackingState(ref bool isTracking, ref FaceTrackingState state);
+            [DllImport(PXR_API_DLL, CallingConvention = CallingConvention.Cdecl)]
+            private static extern int Pxr_GetFaceTrackingData1(ref FaceTrackingDataGetInfo getInfo, ref FaceTrackingData data);
+
+            public static int UPxr_WantFaceTrackingService()
+            {
+                int val = -1;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_WantFaceTrackingService();
+#endif
+                }
+                return val;
+            }
+
+            public static int UPxr_GetFaceTrackingSupported(ref bool supported, ref int supportedModesCount, ref FaceTrackingSupportedMode supportedModes)
+            {
+                int val = -1;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_GetFaceTrackingSupported(ref supported, ref supportedModesCount, ref supportedModes);
+#endif
+        }
+                return val;
+            }
+
+            public static int UPxr_StartFaceTracking(ref FaceTrackingStartInfo startInfo)
+            {
+                int val = -1;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_StartFaceTracking(ref startInfo);
+#endif
+                }
+                return val;
+            }
+
+            public static int UPxr_StopFaceTracking(ref FaceTrackingStopInfo stopInfo)
+            {
+                int val = -1;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_StopFaceTracking(ref stopInfo);
+#endif
+                }
+                return val;
+            }
+
+            public static int UPxr_GetFaceTrackingState(ref bool isTracking, ref FaceTrackingState state)
+            {
+                int val = -1;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_GetFaceTrackingState(ref isTracking, ref state);
+#endif
+                }
+                return val;
+            }
+
+            public static int UPxr_GetFaceTrackingData1(ref FaceTrackingDataGetInfo getInfo, ref FaceTrackingData data)
+            {
+                int val = -1;
+                if (System.UPxr_GetAPIVersion() >= 0x200030C)
+                {
+#if !UNITY_EDITOR && UNITY_ANDROID
+                    val = Pxr_GetFaceTrackingData1(ref getInfo, ref data);
+#endif
+                }
+                return val;
+            }
+
+            #endregion
+        }
+
+        public static class MixedReality
+        {
+            private const string TAG = "[PXR_Plugin/MixedReality]";
+
+            public static PxrResult UPxr_CreateAnchorEntity(ref PxrAnchorEntityCreateInfo info, out ulong anchorHandle)
+            {
+                anchorHandle = ulong.MinValue;
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_CreateAnchorEntity(ref info,out anchorHandle);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_DestroyAnchorEntity(ref PxrAnchorEntityDestroyInfo info)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_DestroyAnchorEntity(ref info);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_PersistAnchorEntity(ref PxrAnchorEntityPersistInfo info, out ulong taskId)
+            {
+                taskId = ulong.MinValue;
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_PersistAnchorEntity(ref info, out taskId);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_UnpersistAnchorEntity(ref PxrAnchorEntityUnPersistInfo info, out ulong taskId)
+            {
+                taskId = ulong.MinValue;
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_UnpersistAnchorEntity(ref info, out taskId);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_ClearPersistedAnchorEntity(ref PxrAnchorEntityClearInfo info, out ulong taskId)
+            {
+                taskId = ulong.MinValue;
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_ClearPersistedAnchorEntity(ref info, out taskId);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_GetAnchorPose(ulong anchorHandle, PxrTrackingOrigin origin, out PxrPosef pose)
+            {
+                pose = new PxrPosef();
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_GetAnchorPose(anchorHandle,origin, out pose);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_GetAnchorEntityUuid(ulong anchorHandle, out PxrUuid uuid)
+            {
+                uuid = new PxrUuid();
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_GetAnchorEntityUuid(anchorHandle, out uuid);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_GetAnchorComponentFlags(ulong anchorHandle, out ulong flag)
+            {
+                flag = UInt64.MinValue;
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_GetAnchorComponentFlags(anchorHandle, out flag);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_LoadAnchorEntity(ref PxrAnchorEntityLoadInfo info, out ulong taskId)
+            {
+                taskId = ulong.MinValue;
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_LoadAnchorEntity(ref info, out taskId);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_GetAnchorEntityLoadResults(ulong taskId, ref PxrAnchorEntityLoadResults result)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_GetAnchorEntityLoadResults(taskId, ref result);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_StartSpatialSceneCapture(out ulong taskId)
+            {
+                taskId = ulong.MinValue;
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_StartSpatialSceneCapture(out taskId);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_GetAnchorVolumeInfo(ulong anchorHandle, ref PxrAnchorVolumeInfo info)
+            {
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_GetAnchorBoxInfo(anchorHandle, ref info);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_GetAnchorPlanePolygonInfo(ulong anchorHandle, ref PxrAnchorPlanePolygonInfo info)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_GetAnchorPlanePolygonInfo(anchorHandle, ref info);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_GetAnchorPlaneBoundaryInfo(ulong anchorHandle, ref PxrAnchorPlaneBoundaryInfo info)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_GetAnchorPlaneBoundaryInfo(anchorHandle, ref info);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            public static PxrResult UPxr_GetAnchorSceneLabel(ulong anchorHandle, out PxrSceneLabel label)
+            {
+                label = PxrSceneLabel.UnKnown;
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_GetAnchorSceneLabel(anchorHandle, out label);
+#else
+                return PxrResult.TIMEOUT_EXPIRED;
+#endif
+            }
+
+            #region Deprecate
+            public static int UPxr_StartHumanOcclusion()
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_StartHumanOcclusion();
+#else
+                return -1;
+#endif
+            }
+            public static int UPxr_AcquireMeshingInfo(IntPtr maskBuffer, IntPtr verticesBuffer, out uint verticesSize, IntPtr facetsBuffer, out uint facetSize, out bool haveRead)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_AcquireMeshingInfo(maskBuffer,verticesBuffer, out verticesSize, facetsBuffer, out facetSize, out haveRead);
+#else
+                verticesSize = 0;
+                facetSize = 0;
+                haveRead = false;
+                return -1;
+#endif
+            }
+            public static int UPxr_StopHumanOcclusion()
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_StopHumanOcclusion();
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_CreateSpatialAnchor(ref PxrSpatialAnchorCreateInfo info, ref UInt64 handle)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_CreateSpatialAnchor(ref info,ref handle);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_DestroySpatialAnchor(UInt64 handle)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_DestroySpatialAnchor(handle);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_SaveSpatialAnchor(ref PxrSpatialAnchorSaveInfo info, ref UInt64 requestId)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_SaveSpatialAnchor(ref info,ref requestId);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_DeleteSpatialAnchor(ref PxrSpatialAnchorDeleteInfo info, ref UInt64 requestId)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_DeleteSpatialAnchor(ref info,ref requestId);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_LoadSpatialAnchorById(ref PxrSpatialInstanceLoadByIdInfo info, ref UInt64 requestId)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_LoadSpatialAnchorById(ref info,ref requestId);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_GetSpatialAnchorLoadResults(UInt64 requestId, ref PxrSpatialAnchorLoadResults results)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_GetSpatialAnchorLoadResults(requestId,ref results);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_GetSpatialAnchorPose(UInt64 handle, double predictDisplayTime, PxrReferenceType type, ref PxrPosef pose)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_GetSpatialAnchorPose(handle, predictDisplayTime, type, ref pose);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_GetSpatialAnchorUuid(UInt64 handle, ref PxrSpatialInstanceUuid uuid)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_GetSpatialAnchorUuid(handle, ref uuid);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_CreateRoomSceneData(PxrSpatialInstanceUuid anchorUuid, IntPtr roomSceneData, int dataLen, ref ulong roomSceneDataHandle)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_CreateRoomSceneData(anchorUuid, roomSceneData, dataLen, ref roomSceneDataHandle);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_DestroyRoomSceneData(ulong roomSceneDataHandle)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_DestroyRoomSceneData(roomSceneDataHandle);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_SaveRoomSceneData(ref PxrRoomSceneDataSaveInfo saveInfo, ref ulong requestId)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_SaveRoomSceneData(ref saveInfo, ref requestId);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_DeleteRoomSceneData(ref PxrRoomSceneDataDeleteInfo deleteInfo, ref ulong requestId)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_DeleteRoomSceneData(ref deleteInfo, ref requestId);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_LoadRoomScene(ref PxrRoomSceneLoadInfo loadInfo, ref ulong requestId)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_LoadRoomScene(ref loadInfo, ref requestId);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_GetRoomSceneLoadResults(ulong requestId, ref PxrRoomSceneLoadResults results)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_GetRoomSceneLoadResults(requestId, ref results);
+#else
+                return -1;
+#endif
+            }
+
+            public static int UPxr_StartRoomCapture()
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return Pxr_StartRoomCapture();
+#else
+                return -1;
+#endif
+            }
+
+            #endregion
+
+            private const int MAX_EVENT = 20;
+            private static IntPtr[] eventArrayHandle = new IntPtr[MAX_EVENT];
+            public static bool UPxr_PollEventQueue(ref List<PxrEventDataBuffer> bufferList)
+            {
+                bool ret = false;
+#if UNITY_ANDROID && !UNITY_EDITOR
+                int eventNum = 0;
+                ret = Pxr_PollEventFromXRPlugin(ref eventNum, eventArrayHandle);
+                if (ret)
+                {
+                    for (int i = 0; i < eventNum; i++)
+                    {
+                        PxrEventDataBuffer buffer = (PxrEventDataBuffer)Marshal.PtrToStructure(eventArrayHandle[i], typeof(PxrEventDataBuffer));
+                        bufferList.Add(buffer);
+                    }
+                }
+#endif
+                return ret;
+            }
+
         }
     }
 }

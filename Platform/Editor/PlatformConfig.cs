@@ -39,6 +39,7 @@ namespace Pico.Platform.Editor
         static string[] strMinApiLevel = {$"Android Min API Level ≥ {EditorConf.minSdkLevel}", $"Android最小API不低于{EditorConf.minSdkLevel}"};
         static string[] strIgnoreButtonText = {"Ask me later", "稍后询问"};
         static string[] strApplyButtonText = {"Apply", "应用"};
+        static string[] strHighlightText = {"Use Highlight", "开启高光时刻"};
 
         private class Res
         {
@@ -164,6 +165,12 @@ namespace Pico.Platform.Editor
             get { return PicoGs.appId; }
             set { PicoGs.appId = value; }
         }
+        
+        public static bool useHighlight
+        {
+            get { return PicoGs.useHighlight; }
+            set { PicoGs.useHighlight = value; }
+        }
 
         bool enableEC
         {
@@ -257,6 +264,13 @@ namespace Pico.Platform.Editor
                 {
                     GUI.enabled = true;
                 }
+            }
+            //Highlight设置
+            {
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label(strHighlightText[(int) language]);
+                useHighlight = EditorGUILayout.Toggle(useHighlight, GUILayout.Width(frameWidth));
+                EditorGUILayout.EndHorizontal();
             }
             //Recommend Settings
             {

@@ -252,13 +252,30 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
-        /// Set tile render
+        /// Sets a tracking origin mode for the app.
+        /// When the user moves in the virtual scene, the system tracks and calculates the user's positional changes based on the origin.
         /// </summary>
-        /// <param name="isTileRender"></param>
-        /// <returns></returns>
-        public static int SetGLTileRender(bool isTileRender)
+        /// <param name="originMode">Selects a tracking origin mode from the following:
+        /// * `TrackingOriginModeFlags.Device`: Device mode. The system sets the device's initial position as the origin. The device's height from the floor is not calculated.
+        /// * `TrackingOriginModeFlags.Floor`: Floor mode. The system sets an origin based on the device's original position and the device's height from the floor. 
+        /// </param>
+        public static void SetTrackingOrigin(PxrTrackingOrigin originMode)
         {
-            return PXR_Plugin.System.UPxr_SetGLTileRender(isTileRender);
+            PXR_Plugin.System.UPxr_SetTrackingOrigin(originMode);
+        }
+
+        /// <summary>
+        /// Gets the tracking origin mode of the app.
+        /// </summary>
+        /// <param name="originMode">Returns the app's tracking origin mode:
+        /// * `TrackingOriginModeFlags.Device`: Device mode
+        /// * `TrackingOriginModeFlags.Floor`: Floor mode
+        /// For the description of each mode, refer to `SetTrackingOrigin`.
+        /// </param>
+        public static void GetTrackingOrigin(out PxrTrackingOrigin originMode)
+        {
+            originMode = PxrTrackingOrigin.Eye;
+            PXR_Plugin.System.UPxr_GetTrackingOrigin(ref originMode);
         }
     }
 }

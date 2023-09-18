@@ -17,6 +17,9 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
+using UnityEngine.UI;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Unity.XR.PXR
 {
@@ -67,6 +70,13 @@ namespace Unity.XR.PXR
         public bool bodyTracking;
         [HideInInspector]
         public FoveationLevel foveationLevel = FoveationLevel.None;
+        [HideInInspector]
+        public bool adaptiveResolution;
+        [HideInInspector]
+        public FoveationLevel eyeFoveationLevel = FoveationLevel.None;
+        [HideInInspector]
+        public FoveatedRenderingMode foveatedRenderingMode = FoveatedRenderingMode.FixedFoveatedRendering;
+
 
         //MRC
         #region MRCData
@@ -103,6 +113,17 @@ namespace Unity.XR.PXR
         public RenderTexture mrcForegroundRT = null;
         private Color foregroundColor = new Color(0, 1, 0, 1);
         private static float height;
+        [SerializeField]
+        [HideInInspector]
+        public AdaptiveResolutionPowerSetting adaptiveResolutionPowerSetting = AdaptiveResolutionPowerSetting.BALANCED;
+
+        [SerializeField]
+        [HideInInspector]
+        public float minEyeTextureScale = 0.7f;
+
+        [SerializeField]
+        [HideInInspector]
+        public float maxEyeTextureScale = 1.26f;
 
         #endregion
 
@@ -112,6 +133,32 @@ namespace Unity.XR.PXR
 
         [HideInInspector]
         public bool useRecommendedAntiAliasingLevel = true;
+
+        private List<PxrEventDataBuffer> eventList = new List<PxrEventDataBuffer>();
+
+
+        //New
+        public static event Action<PxrEventAnchorEntityCreated> AnchorEntityCreated;
+        public static event Action<PxrEventSpatialTrackingStateUpdate> SpatialTrackingStateUpdate;
+        public static event Action<PxrEventAnchorEntityPersisted> AnchorEntityPersisted;
+        public static event Action<PxrEventAnchorEntityUnPersisted> AnchorEntityUnPersisted;
+        public static event Action<PxrEventAnchorEntityCleared> AnchorEntityCleared;
+        public static event Action<PxrEventAnchorEntityLoaded> AnchorEntityLoaded;
+        public static event Action<PxrEventSpatialSceneCaptured> SpatialSceneCaptured;
+        public static event Action<PxrEventSemiAutoCandidatesUpdate> SemiAutoCandidatesUpdate;
+
+        //Deprecate
+        public static event Action<PxrEventSpatialAnchorSaveResult> SpatialAnchorSaveResult;
+        public static event Action<PxrEventSpatialAnchorDeleteResult> SpatialAnchorDeleteResult;
+        public static event Action<PxrEventSpatialAnchorLoadResults> SpatialAnchorLoadResults;
+        public static event Action<PxrEventSpatialAnchorLoadResultsAvailable> SpatialAnchorLoadResultsAvailable;
+        public static event Action<PxrEventSpatialAnchorLoadResultsComplete> SpatialAnchorLoadResultsComplete;
+        public static event Action<PxrEventRoomSceneLoadResultsComplete> RoomSceneLoadResultsComplete;
+        public static event Action<PxrEventRoomSceneDataSaveResult> RoomSceneDataSaveResult;
+        public static event Action<PxrEventRoomSceneDataDeleteResult> RoomSceneDataDeleteResult;
+        public static event Action<PxrEventRoomSceneDataUpdateResult> RoomSceneDataUpdateResult;
+        public static event Action<PxrSemiAutoRoomCaptureCandidatesUpdate> SemiAutoRoomCaptureCandidatesUpdate;
+        public static event Action<PxrEventSpatialTrackingStateInfo> SpatialTrackingStateInfo;
 
         void Awake()
         {
@@ -140,10 +187,18 @@ namespace Unity.XR.PXR
                 }
             }
 
-            PXR_Plugin.Render.UPxr_SetFoveationLevel(foveationLevel);
             PXR_Plugin.System.UPxr_EnableEyeTracking(eyeTracking);
             PXR_Plugin.System.UPxr_EnableFaceTracking(faceTracking);
             PXR_Plugin.System.UPxr_EnableLipSync(lipsyncTracking);
+
+            if (FoveatedRenderingMode.FixedFoveatedRendering == foveatedRenderingMode)
+            {
+                PXR_Plugin.Render.UPxr_SetFoveationLevel(foveationLevel);
+            }
+            else if (FoveatedRenderingMode.EyeTrackedFoveatedRendering == foveatedRenderingMode)
+            {
+                StartCoroutine("SetEyeFoveationLevel");
+            }
 
             int recommendedAntiAliasingLevel = PXR_Plugin.System.UPxr_GetConfigInt(ConfigType.AntiAliasingLevelRecommended);
             if (useRecommendedAntiAliasingLevel && QualitySettings.antiAliasing != recommendedAntiAliasingLevel)
@@ -169,6 +224,22 @@ namespace Unity.XR.PXR
                 MRCInitialize();
             }
             PXR_Plugin.System.UPxr_LogSdkApi("pico_msaa|" + QualitySettings.antiAliasing.ToString());
+        }
+
+        bool setETFRResult = false;
+        IEnumerator SetEyeFoveationLevel()
+        {
+            int num = 3;
+            while (num-- > 0)
+            {
+                if (setETFRResult)
+                {
+                    break;
+                }
+                setETFRResult = PXR_Plugin.Render.UPxr_SetEyeFoveationLevel(eyeFoveationLevel);
+                PLog.i(TAG, "num = " + num + "setETFRResult = " + setETFRResult);
+                yield return new WaitForSeconds(1);
+            }
         }
 
         void OnApplicationPause(bool pause)
@@ -218,6 +289,11 @@ namespace Unity.XR.PXR
             Application.targetFrameRate = 72;
 #endif
             PXR_Plugin.Controller.UPxr_SetControllerDelay();
+
+            if (adaptiveResolution)
+            {
+                XRSettings.eyeTextureResolutionScale = maxEyeTextureScale;
+            }
         }
 
         void Update()
@@ -239,6 +315,31 @@ namespace Unity.XR.PXR
             }
 
             UpdateMRCCam();
+            //Adaptive Resolution
+            if (adaptiveResolution)
+            {
+                UpdateAdaptiveResolution();
+            }
+
+            //pollEvent
+            PollEvent();
+        }
+
+        void UpdateAdaptiveResolution()
+        {
+            float lastRenderScale = XRSettings.renderViewportScale;
+            int newWidth = (int)((float)XRSettings.eyeTextureWidth * lastRenderScale);
+            int success = PXR_Plugin.System.UPxr_UpdateAdaptiveResolution(ref newWidth, adaptiveResolutionPowerSetting);
+
+            if (success == -1)
+                return;
+
+            float currRenderScale = (float)newWidth / (float)XRSettings.eyeTextureWidth;
+            float minScale = minEyeTextureScale / maxEyeTextureScale;
+            float newRenderScale = Mathf.Min(1.0f, Mathf.Max(currRenderScale, minScale));
+            //Debug.Log(" RenderViewportScale: " + newRenderScale);
+
+            UnityEngine.XR.XRSettings.renderViewportScale = newRenderScale;
         }
 
         void OnEnable()
@@ -288,6 +389,351 @@ namespace Unity.XR.PXR
             {
                 PXR_Plugin.Render.UPxr_SetAppSpacePosition(m_AppSpaceTransform.position.x, m_AppSpaceTransform.position.y, m_AppSpaceTransform.position.z);
                 PXR_Plugin.Render.UPxr_SetAppSpaceRotation(m_AppSpaceTransform.rotation.x, m_AppSpaceTransform.rotation.y, m_AppSpaceTransform.rotation.z, m_AppSpaceTransform.rotation.w);
+            }
+        }
+
+        private void PollEvent()
+        {
+            eventList.Clear();
+            bool ret = PXR_Plugin.MixedReality.UPxr_PollEventQueue(ref eventList);
+            if (ret)
+            {
+                for (int i = 0; i < eventList.Count; i++)
+                {
+                    Debug.Log("PXRLog PollEventOfMixedReality" + eventList[i].type);
+                    switch (eventList[i].type)
+                    {
+                        case PxrStructureType.AnchorEntityCreated:
+                            {
+                                if (AnchorEntityCreated != null)
+                                {
+                                    PxrEventAnchorEntityCreated info = new PxrEventAnchorEntityCreated()
+                                    {
+                                        taskId = BitConverter.ToUInt64(eventList[i].data, 0),
+                                        result = (PxrResult)BitConverter.ToInt32(eventList[i].data, 8),
+                                        anchorHandle = BitConverter.ToUInt64(eventList[i].data, 16),
+                                    };
+
+                                    byte[] byteArray = new byte[16];
+                                    var value0 = BitConverter.ToUInt64(eventList[i].data, 24);
+                                    var value1 = BitConverter.ToUInt64(eventList[i].data, 32);
+                                    BitConverter.GetBytes(value0).CopyTo(byteArray, 0);
+                                    BitConverter.GetBytes(value1).CopyTo(byteArray, 8);
+                                    info.uuid = new Guid(byteArray);
+                                    AnchorEntityCreated(info);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.AnchorEntityPersisted:
+                            {
+                                if (AnchorEntityPersisted != null)
+                                {
+                                    PxrEventAnchorEntityPersisted info = new PxrEventAnchorEntityPersisted()
+                                    {
+                                        taskId = BitConverter.ToUInt64(eventList[i].data, 0),
+                                        result = (PxrResult)BitConverter.ToInt32(eventList[i].data, 8),
+                                        location = (PxrPersistLocation)BitConverter.ToInt32(eventList[i].data, 12)
+                                    };
+                                    AnchorEntityPersisted(info);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.AnchorEntityUnPersisted:
+                            {
+                                if (AnchorEntityUnPersisted != null)
+                                {
+                                    PxrEventAnchorEntityUnPersisted info = new PxrEventAnchorEntityUnPersisted()
+                                    {
+                                        taskId = BitConverter.ToUInt64(eventList[i].data, 0),
+                                        result = (PxrResult)BitConverter.ToInt32(eventList[i].data, 8),
+                                        location = (PxrPersistLocation)BitConverter.ToInt32(eventList[i].data, 12)
+                                    };
+                                    AnchorEntityUnPersisted(info);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.AnchorEntityCleared:
+                            {
+                                if (AnchorEntityCleared != null)
+                                {
+                                    PxrEventAnchorEntityCleared info = new PxrEventAnchorEntityCleared()
+                                    {
+                                        taskId = BitConverter.ToUInt64(eventList[i].data, 0),
+                                        result = (PxrResult)BitConverter.ToInt32(eventList[i].data, 8),
+                                        location = (PxrPersistLocation)BitConverter.ToInt32(eventList[i].data, 12)
+                                    };
+                                    AnchorEntityCleared(info);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.AnchorEntityLoaded:
+                            {
+                                if (AnchorEntityLoaded != null)
+                                {
+                                    PxrEventAnchorEntityLoaded info = new PxrEventAnchorEntityLoaded()
+                                    {
+                                        taskId = BitConverter.ToUInt64(eventList[i].data, 0),
+                                        result = (PxrResult)BitConverter.ToInt32(eventList[i].data, 8),
+                                        count = BitConverter.ToUInt32(eventList[i].data, 12),
+                                        location = (PxrPersistLocation)BitConverter.ToInt32(eventList[i].data, 16)
+                                    };
+                                    AnchorEntityLoaded(info);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.SpatialTrackingStateUpdate:
+                            {
+                                if (SpatialTrackingStateUpdate != null)
+                                {
+                                    PxrEventSpatialTrackingStateUpdate info = new PxrEventSpatialTrackingStateUpdate()
+                                    {
+                                        state = (PxrSpatialTrackingState)BitConverter.ToInt32(eventList[i].data, 0),
+                                        message = (PxrSpatialTrackingStateMessage)BitConverter.ToInt32(eventList[i].data, 4),
+                                    };
+                                    SpatialTrackingStateUpdate(info);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.SpatialSceneCaptured:
+                            {
+                                if (SpatialSceneCaptured != null)
+                                {
+                                    PxrEventSpatialSceneCaptured info = new PxrEventSpatialSceneCaptured()
+                                    {
+                                        taskId = BitConverter.ToUInt64(eventList[i].data, 0),
+                                        result = (PxrResult)BitConverter.ToInt32(eventList[i].data, 8),
+                                        status = (PxrSpatialSceneCaptureStatus)BitConverter.ToUInt32(eventList[i].data, 12),
+                                    };
+                                    SpatialSceneCaptured(info);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.PXR_TYPE_EVENT_DATA_SEETHROUGH_STATE_CHANGED:
+                            {
+                                PXR_Plugin.System.SeethroughStateChangedChanged((int)BitConverter.ToInt32(eventList[i].data, 0));
+                            }
+                            break;
+                        case PxrStructureType.SemiAutoCandidatesUpdate:
+                            {
+                                if (SemiAutoCandidatesUpdate != null)
+                                {
+                                    PxrEventSemiAutoCandidatesUpdate data = new PxrEventSemiAutoCandidatesUpdate()
+                                    {
+                                        state = BitConverter.ToUInt32(eventList[i].data, 0),
+                                        count = BitConverter.ToUInt32(eventList[i].data, 4),
+                                    };
+                                    SemiAutoCandidatesUpdate(data);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.SpatialAnchorSaveResult:
+                            {
+                                if (SpatialAnchorSaveResult != null)
+                                {
+                                    PxrEventSpatialAnchorSaveResult result = new PxrEventSpatialAnchorSaveResult()
+                                    {
+                                        type = PxrStructureType.SpatialAnchorSaveResult,
+                                        eventLevel = eventList[i].eventLevel,
+                                        result = (PxrSpatialPersistenceResult)BitConverter.ToInt32(eventList[i].data, 0),
+                                        asyncRequestId = BitConverter.ToUInt64(eventList[i].data, 8),
+                                        uuid = new PxrSpatialInstanceUuid()
+                                        {
+                                            value0 = BitConverter.ToUInt64(eventList[i].data, 16),
+                                            value1 = BitConverter.ToUInt64(eventList[i].data, 24),
+                                        },
+                                        handle = BitConverter.ToUInt64(eventList[i].data, 32),
+                                        location = (PxrSpatialPersistenceLocation)BitConverter.ToInt32(eventList[i].data, 40)
+                                    };
+                                    SpatialAnchorSaveResult(result);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.SpatialAnchorDeleteResult:
+                            {
+                                if (SpatialAnchorDeleteResult != null)
+                                {
+                                    PxrEventSpatialAnchorDeleteResult result = new PxrEventSpatialAnchorDeleteResult()
+                                    {
+                                        type = PxrStructureType.SpatialAnchorDeleteResult,
+                                        eventLevel = eventList[i].eventLevel,
+                                        result = (PxrSpatialPersistenceResult)BitConverter.ToInt32(eventList[i].data, 0),
+                                        asyncRequestId = BitConverter.ToUInt64(eventList[i].data, 8),
+                                        uuid = new PxrSpatialInstanceUuid()
+                                        {
+                                            value0 = BitConverter.ToUInt64(eventList[i].data, 16),
+                                            value1 = BitConverter.ToUInt64(eventList[i].data, 24),
+                                        },
+                                        location = (PxrSpatialPersistenceLocation)BitConverter.ToInt32(eventList[i].data, 32)
+                                    };
+                                    SpatialAnchorDeleteResult(result);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.SpatialAnchorLoadResults:
+                            {
+                                if (SpatialAnchorLoadResults != null)
+                                {
+                                    PxrEventSpatialAnchorLoadResults results = new PxrEventSpatialAnchorLoadResults()
+                                    {
+                                        type = PxrStructureType.SpatialAnchorLoadResults,
+                                        eventLevel = eventList[i].eventLevel,
+                                        result = (PxrSpatialPersistenceResult)BitConverter.ToInt32(eventList[i].data, 0),
+                                        hasNext = BitConverter.ToBoolean(eventList[i].data, 4),
+                                        asyncRequestId = BitConverter.ToUInt64(eventList[i].data, 8),
+                                        numResults = BitConverter.ToUInt32(eventList[i].data, 16),
+                                        loadResults = new PxrSpatialAnchorLoadResult[BitConverter.ToUInt32(eventList[i].data, 16)],
+                                    };
+                                    int offset = 24;
+                                    for (int j = 0; j < results.numResults; j++)
+                                    {
+                                        results.loadResults[j] = new PxrSpatialAnchorLoadResult();
+                                        results.loadResults[j].anchorHandle = BitConverter.ToUInt64(eventList[i].data, offset);
+                                        offset += 8;
+                                        results.loadResults[j].uuid = new PxrSpatialInstanceUuid();
+                                        results.loadResults[j].uuid.value0 = BitConverter.ToUInt64(eventList[i].data, offset);
+                                        offset += 8;
+                                        results.loadResults[j].uuid.value1 = BitConverter.ToUInt64(eventList[i].data, offset);
+                                        offset += 8;
+                                    }
+                                    SpatialAnchorLoadResults(results);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.SpatialAnchorLoadResultsAvailable:
+                            {
+                                if (SpatialAnchorLoadResultsAvailable != null)
+                                {
+                                    PxrEventSpatialAnchorLoadResultsAvailable data = new PxrEventSpatialAnchorLoadResultsAvailable()
+                                    {
+                                        type = PxrStructureType.SpatialAnchorLoadResultsAvailable,
+                                        eventLevel = eventList[i].eventLevel,
+                                        asyncRequestId = BitConverter.ToUInt64(eventList[i].data, 0),
+                                    };
+                                    SpatialAnchorLoadResultsAvailable(data);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.SpatialAnchorLoadResultsComplete:
+                            {
+                                if (SpatialAnchorLoadResultsComplete != null)
+                                {
+                                    PxrEventSpatialAnchorLoadResultsComplete data = new PxrEventSpatialAnchorLoadResultsComplete()
+                                    {
+                                        type = PxrStructureType.SpatialAnchorLoadResultsComplete,
+                                        eventLevel = eventList[i].eventLevel,
+                                        asyncRequestId = BitConverter.ToUInt64(eventList[i].data, 0),
+                                        result = (PxrSpatialPersistenceResult)BitConverter.ToInt32(eventList[i].data, 8),
+                                    };
+                                    SpatialAnchorLoadResultsComplete(data);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.RoomSceneDataSaveResult:
+                            {
+                                if (RoomSceneDataSaveResult != null)
+                                {
+                                    PxrEventRoomSceneDataSaveResult data = new PxrEventRoomSceneDataSaveResult()
+                                    {
+                                        type = PxrStructureType.RoomSceneDataSaveResult,
+                                        eventLevel = eventList[i].eventLevel,
+                                        result = (PxrSpatialPersistenceResult)BitConverter.ToInt32(eventList[i].data, 0),
+                                        asyncRequestId = BitConverter.ToUInt64(eventList[i].data, 8),
+                                        handle = BitConverter.ToUInt64(eventList[i].data, 16),
+                                        location = (PxrSpatialPersistenceLocation)BitConverter.ToInt32(eventList[i].data, 24),
+                                    };
+                                    RoomSceneDataSaveResult(data);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.RoomSceneDataDeleteResult:
+                            {
+                                if (RoomSceneDataDeleteResult != null)
+                                {
+                                    PxrEventRoomSceneDataDeleteResult data = new PxrEventRoomSceneDataDeleteResult()
+                                    {
+                                        type = PxrStructureType.RoomSceneDataDeleteResult,
+                                        eventLevel = eventList[i].eventLevel,
+                                        result = (PxrSpatialPersistenceResult)BitConverter.ToInt32(eventList[i].data, 0),
+                                        asyncRequestId = BitConverter.ToUInt64(eventList[i].data, 8),
+                                        handle = BitConverter.ToUInt64(eventList[i].data, 16),
+                                        location = (PxrSpatialPersistenceLocation)BitConverter.ToInt32(eventList[i].data, 24),
+                                    };
+                                    RoomSceneDataDeleteResult(data);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.RoomSceneLoadResultsComplete:
+                            {
+                                if (RoomSceneLoadResultsComplete != null)
+                                {
+                                    PxrEventRoomSceneLoadResultsComplete data = new PxrEventRoomSceneLoadResultsComplete()
+                                    {
+                                        type = PxrStructureType.RoomSceneLoadResultsComplete,
+                                        eventLevel = eventList[i].eventLevel,
+                                        asyncRequestId = BitConverter.ToUInt64(eventList[i].data, 0),
+                                        result = (PxrSpatialPersistenceResult)BitConverter.ToInt32(eventList[i].data, 8),
+                                    };
+                                    RoomSceneLoadResultsComplete(data);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.RoomSceneDataUpdateResult:
+                            {
+                                if (RoomSceneDataUpdateResult != null)
+                                {
+                                    PxrEventRoomSceneDataUpdateResult data = new PxrEventRoomSceneDataUpdateResult()
+                                    {
+                                        type = PxrStructureType.RoomSceneDataUpdateResult,
+                                        level = eventList[i].eventLevel,
+                                        anchorUuid = new PxrSpatialInstanceUuid()
+                                        {
+                                            value0 = BitConverter.ToUInt64(eventList[i].data, 0),
+                                            value1 = BitConverter.ToUInt64(eventList[i].data, 8),
+                                        },
+                                        roomSceneDataHandle = BitConverter.ToUInt64(eventList[i].data, 16),
+                                        result = BitConverter.ToUInt32(eventList[i].data, 24),
+                                        dataLength = BitConverter.ToUInt32(eventList[i].data, 28),
+                                    };
+                                    data.roomSceneData = new byte[data.dataLength];
+                                    Buffer.BlockCopy(eventList[i].data, 32, data.roomSceneData, 0, (int)data.dataLength);
+                                    RoomSceneDataUpdateResult(data);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.SemiAutoRoomCaptureCandidatesUpdate:
+                            {
+                                if (SemiAutoRoomCaptureCandidatesUpdate != null)
+                                {
+                                    PxrSemiAutoRoomCaptureCandidatesUpdate data = new PxrSemiAutoRoomCaptureCandidatesUpdate()
+                                    {
+                                        type = PxrStructureType.SemiAutoRoomCaptureCandidatesUpdate,
+                                        eventLevel = eventList[i].eventLevel,
+                                        result = (PxrSpatialPersistenceResult)BitConverter.ToInt32(eventList[i].data, 0),
+                                    };
+                                    SemiAutoRoomCaptureCandidatesUpdate(data);
+                                }
+                            }
+                            break;
+                        case PxrStructureType.TrackingStateChanged:
+                            {
+                                if (SpatialTrackingStateInfo != null)
+                                {
+                                    PxrEventSpatialTrackingStateInfo info = new PxrEventSpatialTrackingStateInfo()
+                                    {
+                                        type = PxrStructureType.TrackingStateChanged,
+                                        eventLevel = eventList[i].eventLevel,
+                                        stateInfo = new PxrSpatialTrackingStateInfo()
+                                        {
+                                            state = (PxrSpatialTrackingState)BitConverter.ToInt32(eventList[i].data, 0),
+                                            message = (PxrSpatialTrackingStateMessage)BitConverter.ToInt32(eventList[i].data, 4),
+                                        },
+                                    };
+                                    SpatialTrackingStateInfo(info);
+                                }
+                            }
+                            break;
+                    }
+                }
             }
         }
 

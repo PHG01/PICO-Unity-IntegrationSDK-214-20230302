@@ -564,6 +564,36 @@ namespace Unity.XR.PXR
         }
 
         /// <summary>
+        /// Sets a body tracking mode for PICO Motion Tracker. If this API is not called, the mode defaults to leg tracking.
+        /// @note If you want to set the mode to full-body tracking, you must call this API before calling `OpenFitnessBandCalibrationAPP`.
+        /// </summary>
+        /// <param name="mode">Selects a body tracking mode from the following:
+        /// * `0`: leg tracking, nodes numbered 0 to 15 in `BodyTrackerRole` enum will return data.
+        /// * `1`: full-body tracking, nodes numbered 0 to 23 in `BodyTrackerRole` enum will return data.
+        /// </param>
+        /// <returns>
+        /// * `0`: success
+        /// * `1`: failure
+        /// </returns>
+        public static int SetSwiftMode(int mode)
+        {
+            return PXR_Plugin.Controller.UPxr_SetSwiftMode(mode);
+        }
+
+        /// <summary>
+        /// Sets bone lengths for different parts of the avatar. The data will be sent to PICO'S algorithm to make the avatar's poses more accurate. 
+        /// </summary>
+        /// <param name="boneLength">Sets the bone lengths for different parts of the avatar. See the `BodyTrackingBoneLength` for details.</param>
+        /// <returns>
+        /// * `0`: success
+        /// * `1`: failure
+        /// </returns>
+        public static int SetBodyTrackingBoneLength(BodyTrackingBoneLength boneLength)
+        {
+            return PXR_Plugin.Controller.UPxr_SetBodyTrackingBoneLength(boneLength);
+        }
+
+        /// <summary>
         /// Launches the calibration app if the PICO Motion Tracker hasn't completed calibration.
         /// </summary>
         public static void OpenFitnessBandCalibrationAPP() {
